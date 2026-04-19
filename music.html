@@ -389,8 +389,8 @@
     var playBtn = document.getElementById('playBtn');
     if(!bars || !playBtn) return;
 
-    // Generate bars
-    var barCount = 60;
+    // Generate bars — adapt count to screen width
+    var barCount = Math.min(60, Math.floor(window.innerWidth / 8));
     for(var i = 0; i < barCount; i++){
       var bar = document.createElement('div');
       bar.className = 'bar';

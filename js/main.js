@@ -45,11 +45,21 @@
   const navToggle = document.getElementById('navToggle');
   const mobileMenu = document.getElementById('mobileMenu');
   if (navToggle && mobileMenu) {
+    function closeMobileMenu() {
+      mobileMenu.classList.remove('active');
+      document.body.style.overflow = '';
+      const spans = navToggle.querySelectorAll('span');
+      spans[0].style.transform = '';
+      spans[1].style.opacity = '';
+      spans[2].style.transform = '';
+    }
+
     navToggle.addEventListener('click', () => {
       mobileMenu.classList.toggle('active');
-      // Animate hamburger
+      const isOpen = mobileMenu.classList.contains('active');
+      document.body.style.overflow = isOpen ? 'hidden' : '';
       const spans = navToggle.querySelectorAll('span');
-      if (mobileMenu.classList.contains('active')) {
+      if (isOpen) {
         spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
         spans[1].style.opacity = '0';
         spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
@@ -64,12 +74,15 @@
     const mobileLinks = mobileMenu.querySelectorAll('a');
     mobileLinks.forEach((link) => {
       link.addEventListener('click', () => {
-        mobileMenu.classList.remove('active');
-        const spans = navToggle.querySelectorAll('span');
-        spans[0].style.transform = '';
-        spans[1].style.opacity = '';
-        spans[2].style.transform = '';
+        closeMobileMenu();
       });
+    });
+
+    // Close mobile menu on ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+        closeMobileMenu();
+      }
     });
   }
 

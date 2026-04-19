@@ -1340,10 +1340,47 @@ body:hover .custom-cursor { opacity: 0.6; }
   .footer-container { grid-template-columns: 1fr; }
   .template-grid { grid-template-columns: repeat(3, 1fr); }
   .explore-cards { grid-template-columns: 1fr; }
+
+  /* Sub-page mobile */
+  .page-hero h1 { font-size: clamp(1.8rem, 6vw, 2.5rem) !important; }
+  .page-hero .page-hero-content,
+  .page-hero-content { padding: 5rem 1.5rem 3rem !important; }
+  .page-body { padding: 2.5rem 1rem !important; }
+  .page-hero p { font-size: 0.95rem !important; }
+
+  /* Gallery overlay visible on touch */
+  .gallery-overlay {
+    opacity: 1 !important;
+    background: linear-gradient(180deg, transparent 50%, rgba(15,36,64,0.8) 100%);
+  }
+  .gallery-overlay h3,
+  .gallery-overlay p { transform: translateY(0); }
+
+  /* Image min-heights */
+  .placeholder-img { min-height: 250px; }
+  .placeholder-dongba-ritual,
+  .placeholder-naxi-orchestra { min-height: 220px; }
+
+  /* Hide custom cursor on touch */
+  .custom-cursor { display: none !important; }
+
+  /* Music visualizer padding */
+  .music-visualizer { padding: 1.5rem !important; }
+  .waveform-bars { overflow: hidden; }
 }
 
 @media (max-width: 480px) {
   :root { --space-xl: 4rem; --space-2xl: 6rem; }
   .template-grid { grid-template-columns: repeat(2, 1fr); }
   .hero-desc br { display: none; }
+
+  /* Sub-page extra small */
+  .page-hero .page-hero-content,
+  .page-hero-content { padding: 4rem 1rem 2rem !important; }
+  .page-body { padding: 2rem 0.8rem !important; }
+
+  /* Hide some hero floating SVGs on very small screens */
+  .dongba-float.d2,
+  .dongba-float.d4,
+  .dongba-float.d5 { display: none; }
 }
