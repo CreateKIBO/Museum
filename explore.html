@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1B3A5C">
+  <title>文化探索 — 纳西文化博物馆</title>
+    <meta name="theme-color" content="#1B3A5C">
+<meta name="description" content="深入了解纳西族文化的前世今生，探索东巴祭司的传承之路。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Story Blocks */
+    .story-block {
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+      margin-bottom: 4rem;
+      padding-bottom: 4rem;
+      border-bottom: 1px solid #EDE8DF;
+    }
+    .story-block:last-of-type {
+      border-bottom: none;
+    }
+    .story-block:nth-child(even) {
+      flex-direction: row-reverse;
+    }
+    .story-image {
+      flex: 0 0 45%;
+      aspect-ratio: 4/3;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .story-image span {
+      color: rgba(255,255,255,0.5);
+      font-size: 2rem;
+      font-family: 'Noto Serif SC', serif;
+      font-weight: 700;
+    }
+    .story-text {
+      flex: 1;
+    }
+    .story-text h2 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.6rem;
+      color: #1B3A5C;
+      margin-bottom: 1rem;
+    }
+    .story-text p {
+      font-size: 1rem;
+      color: #4a4a48;
+      line-height: 1.9;
+      margin-bottom: 1rem;
+    }
+    .story-text blockquote {
+      border-left: 3px solid #C5A55A;
+      padding: 0.8rem 1.2rem;
+      margin: 1.2rem 0;
+      background: rgba(197,165,90,0.06);
+      border-radius: 0 8px 8px 0;
+    }
+    .story-text blockquote p {
+      font-style: italic;
+      color: #6B4226;
+      font-size: 0.95rem;
+      margin-bottom: 0;
+      line-height: 1.8;
+    }
+    @media (max-width: 768px) {
+      .story-block,
+      .story-block:nth-child(even) {
+        flex-direction: column;
+      }
+      .story-image {
+        flex: none;
+        width: 100%;
+      }
+    }
+    /* Heritage Timeline */
+    .heritage-timeline-section {
+      margin-top: 3rem;
+    }
+    .heritage-timeline-section h2 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.8rem;
+      color: #1B3A5C;
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .heritage-timeline {
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .heritage-timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, #1B3A5C, #C5A55A, #C23B22);
+    }
+    .heritage-milestone {
+      position: relative;
+      width: 50%;
+      padding: 0 2.5rem 2.5rem;
+    }
+    .heritage-milestone:nth-child(odd) {
+      margin-left: 0;
+      text-align: right;
+    }
+    .heritage-milestone:nth-child(even) {
+      margin-left: 50%;
+      text-align: left;
+    }
+    .heritage-milestone::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #C23B22;
+      border: 3px solid #EDE8DF;
+      box-shadow: 0 0 0 3px #C23B22;
+    }
+    .heritage-milestone:nth-child(odd)::before {
+      right: -8px;
+    }
+    .heritage-milestone:nth-child(even)::before {
+      left: -8px;
+    }
+    .heritage-milestone .ms-year {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #C23B22;
+      margin-bottom: 0.3rem;
+    }
+    .heritage-milestone .ms-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1B3A5C;
+      margin-bottom: 0.3rem;
+    }
+    .heritage-milestone .ms-desc {
+      font-size: 0.9rem;
+      color: #4a4a48;
+      line-height: 1.7;
+    }
+    @media (max-width: 768px) {
+      .heritage-timeline::before {
+        left: 8px;
+      }
+      .heritage-milestone,
+      .heritage-milestone:nth-child(odd),
+      .heritage-milestone:nth-child(even) {
+        width: 100%;
+        margin-left: 0;
+        text-align: left;
+        padding-left: 2.5rem;
+      }
+      .heritage-milestone:nth-child(odd)::before,
+      .heritage-milestone:nth-child(even)::before {
+        left: 0;
+        right: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar scrolled" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <svg width="32" height="32" viewBox="0 0 100 100"><circle cx="50" cy="20" r="14" fill="none" stroke="#C5A55A" stroke-width="4"/><line x1="50" y1="34" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/><line x1="28" y1="52" x2="72" y2="52" stroke="#C5A55A" stroke-width="4"/><line x1="33" y1="92" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/><line x1="67" y1="92" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/></svg>
+        <span class="logo-text">纳西文化博物馆</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="dictionary.html">东巴文字典</a></li>
+        <li><a href="gallery.html">数字展馆</a></li>
+        <li><a href="music.html">纳西古乐</a></li>
+        <li><a href="explore.html">文化探索</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle" aria-label="菜单"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <ul class="mobile-nav-links">
+      <li><a href="index.html">首页</a></li>
+      <li><a href="dictionary.html">东巴文字典</a></li>
+      <li><a href="gallery.html">数字展馆</a></li>
+      <li><a href="music.html">纳西古乐</a></li>
+      <li><a href="explore.html">文化探索</a></li>
+    </ul>
+  </div>
+
+  <!-- Page Hero -->
+  <section class="page-hero" style="background: linear-gradient(135deg, #0F2440 0%, #1B3A5C 50%, #C23B22 100%);">
+    <div style="position:absolute;inset:0;background:rgba(26,26,24,0.4);"></div>
+    <div class="page-hero-content" style="position:relative;z-index:1;text-align:center;padding:8rem 2rem 4rem;">
+      <h1 style="font-family:'Noto Serif SC',serif;font-size:3rem;color:#F8F6F0;margin-bottom:1rem;">文化探索</h1>
+      <p style="color:rgba(248,246,240,0.8);font-size:1.1rem;max-width:640px;margin:0 auto;line-height:1.8;">深入了解纳西族文化的前世今生，探索东巴祭司的传承之路。</p>
+    </div>
+  </section>
+
+  <!-- Breadcrumb -->
+  <div style="background:#F8F6F0;padding:1rem 2rem;border-bottom:1px solid #EDE8DF;">
+    <div style="max-width:1200px;margin:0 auto;font-size:0.85rem;color:#8C8478;">
+      <a href="index.html" style="color:#1B3A5C;text-decoration:none;">首页</a>
+      <span style="margin:0 0.5rem;">/</span>
+      <span style="color:#6B4226;">文化探索</span>
+    </div>
+  </div>
+
+  <!-- Page Body -->
+  <section class="page-body" style="padding:4rem 2rem;">
+    <div style="max-width:1200px;margin:0 auto;">
+
+      <!-- Story 1: Left Image + Right Text -->
+      <div class="story-block">
+        <div class="story-image placeholder-dongba-ritual">
+          <span>东巴祭司</span>
+        </div>
+        <div class="story-text">
+          <h2>东巴祭司的传承之路</h2>
+          <p>在纳西族的精神世界中，东巴祭司扮演着不可替代的角色。他们是东巴文化的守护者、传播者和实践者，掌握着东巴象形文字的读写、宗教仪式的主持以及天文历法的推算。千百年来，东巴祭司通过严格的师徒传承制度，将这套庞大的知识体系代代相传。</p>
+          <blockquote>
+            <p>"一个东巴的学习，从少年开始，直至白发苍苍仍觉不足。经文、绘画、舞蹈、医药、天文，每一门都需穷尽一生去修习。"——老东巴和万宝</p>
+          </blockquote>
+          <p>如今，随着现代社会的冲击，东巴祭司的数量急剧减少。然而在丽江的偏远山村中，仍有坚守传统的东巴在继续传承着这份珍贵的文化遗产，为纳西族文化的延续默默奉献。</p>
+        </div>
+      </div>
+
+      <!-- Story 2: Right Image + Left Text (reversed) -->
+      <div class="story-block">
+        <div class="story-image placeholder-naxi-music">
+          <span>纳西古乐</span>
+        </div>
+        <div class="story-text">
+          <h2>纳西古乐的抢救与重生</h2>
+          <p>二十世纪中后期，纳西古乐面临着前所未有的生存危机。老一辈乐手相继离世，大量珍贵曲谱散佚，曾经遍布丽江的古乐演奏活动几近消失。这场文化危机引起了有识之士的深切忧虑。</p>
+          <p>1980年代，在宣科先生的倡导下，丽江大研纳西古乐会正式成立。一批年逾古稀的老乐师重新集结，凭借记忆恢复了多首濒临失传的古曲。古乐会开始定期举办公开演出，吸引了国内外学者和音乐爱好者的广泛关注。</p>
+          <blockquote>
+            <p>"每一首古曲的恢复，都是与时间的赛跑。老乐师们带走的，不仅仅是旋律，更是一个时代的回声。"——纳西古乐研究会</p>
+          </blockquote>
+        </div>
+      </div>
+
+      <!-- Story 3: Left Image + Right Text -->
+      <div class="story-block">
+        <div class="story-image placeholder-dongba-script">
+          <span>数字化保护</span>
+        </div>
+        <div class="story-text">
+          <h2>东巴文化的数字化保护</h2>
+          <p>进入二十一世纪，数字技术为文化遗产保护开辟了全新的路径。东巴文化的数字化保护工作涵盖了多个层面：东巴经书的高清扫描与数字化存储、东巴象形文字的Unicode编码与国际标准制定、三维扫描技术对东巴法器与仪式场景的完整记录。</p>
+          <blockquote>
+            <p>"数字技术不是传统文化的替代，而是为其搭建了一座通往未来的桥梁。每一个被数字化的东巴文字，都是一颗种在未来的种子。"——东巴文化数字化项目负责人</p>
+          </blockquote>
+          <p>通过建立东巴文化数字档案库，配合人工智能辅助的经文翻译系统，研究效率得到了显著提升。同时，虚拟现实与增强现实技术的应用，让更多公众能够身临其境地感受东巴文化的独特魅力，为文化传承注入了新的活力。</p>
+        </div>
+      </div>
+
+      <!-- Heritage Timeline -->
+      <div class="heritage-timeline-section">
+        <h2>文化遗产时间线</h2>
+        <div class="heritage-timeline">
+
+          <div class="heritage-milestone">
+            <div class="ms-year">公元前</div>
+            <div class="ms-title">纳西族起源</div>
+            <div class="ms-desc">纳西族先民从西北地区南迁至金沙江流域，在此繁衍生息，逐渐形成独特的民族文化体系。东巴象形文字的雏形在这一时期开始萌芽。</div>
+          </div>
+
+          <div class="heritage-milestone">
+            <div class="ms-year">唐宋</div>
+            <div class="ms-title">东巴文成熟</div>
+            <div class="ms-desc">东巴象形文字体系在唐宋时期趋于成熟，形成了完整的书写系统。大量东巴经书在这一时期被书写记录，内容涵盖宗教、哲学、历史、医学等领域。</div>
+          </div>
+
+          <div class="heritage-milestone">
+            <div class="ms-year">1253</div>
+            <div class="ms-title">忽必烈南征，纳西归附</div>
+            <div class="ms-desc">忽必烈率蒙古大军南征大理，途经丽江，纳西族首领麦良归附元朝。此后纳西土司制度确立，木氏家族开始长达数百年的统治，促进了纳西文化的繁荣发展。</div>
+          </div>
+
+          <div class="heritage-milestone">
+            <div class="ms-year">1997</div>
+            <div class="ms-title">丽江古城列入世界遗产</div>
+            <div class="ms-desc">联合国教科文组织将丽江古城列入世界文化遗产名录，肯定了其独特的历史文化价值。这一荣誉为纳西文化的保护与传承带来了国际关注与资源支持。</div>
+          </div>
+
+          <div class="heritage-milestone">
+            <div class="ms-year">2003</div>
+            <div class="ms-title">东巴古籍列入世界记忆遗产</div>
+            <div class="ms-desc">纳西族东巴古籍文献被联合国教科文组织列入"世界记忆遗产名录"，这是对东巴文化作为人类共同记忆的国际认可，极大推动了东巴文化的保护与研究工作。</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <a href="index.html" class="footer-logo"><svg width="32" height="32" viewBox="0 0 100 100"><circle cx="50" cy="20" r="14" fill="none" stroke="#C5A55A" stroke-width="4"/><line x1="50" y1="34" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/><line x1="28" y1="52" x2="72" y2="52" stroke="#C5A55A" stroke-width="4"/><line x1="33" y1="92" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/><line x1="67" y1="92" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/></svg><span>纳西文化博物馆</span></a>
+        <p class="footer-desc">守护千年东巴文明，传承纳西文化精髓。</p>
+      </div>
+      <div class="footer-nav"><h4>探索</h4><ul><li><a href="dictionary.html">东巴文字典</a></li><li><a href="gallery.html">数字展馆</a></li><li><a href="music.html">纳西古乐</a></li><li><a href="explore.html">文化探索</a></li></ul></div>
+      <div class="footer-nav"><h4>页面</h4><ul><li><a href="index.html">首页</a></li><li><a href="dictionary.html">东巴文字典</a></li><li><a href="gallery.html">数字展馆</a></li><li><a href="explore.html">文化探索</a></li></ul></div>
+      <div class="footer-social"><h4>关注我们</h4><div class="social-icons"><a href="#" aria-label="微信"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-2.5 3c-3.5 0-6.5-2.5-6.5-5.5S7.5 3 11 3s6.5 2.5 6.5 5.5-3 5.5-6.5 5.5z"/></svg></a></div></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 纳西文化博物馆 &middot; 保留所有权利</p></div>
+  </footer>
+
+  <script src="js/animations.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1B3A5C">
+  <title>纳西古乐 — 纳西文化博物馆</title>
+    <meta name="theme-color" content="#1B3A5C">
+<meta name="description" content="融合道教法事音乐、儒教典礼音乐与唐宋词牌曲，纳西古乐被誉为"中国音乐的活化石"。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Music Intro */
+    .music-intro {
+      max-width: 800px;
+      margin: 0 auto 3rem;
+      text-align: center;
+    }
+    .music-intro p {
+      font-size: 1.05rem;
+      color: #4a4a48;
+      line-height: 2;
+      margin-bottom: 1.2rem;
+    }
+    /* Waveform Visualizer */
+    .music-visualizer {
+      max-width: 900px;
+      margin: 0 auto 4rem;
+      background: linear-gradient(135deg, #1A1A18 0%, #1B3A5C 100%);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .music-visualizer::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(197,165,90,0.08) 0%, transparent 70%);
+    }
+    .visualizer-label {
+      position: relative;
+      color: rgba(248,246,240,0.6);
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.1em;
+    }
+    .visualizer-label .song-title {
+      display: block;
+      color: #C5A55A;
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.3rem;
+      margin-top: 0.3rem;
+      letter-spacing: 0;
+    }
+    .waveform-bars {
+      position: relative;
+      width: 100%;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      margin-bottom: 1.5rem;
+    }
+    .waveform-bars .bar {
+      width: 4px;
+      border-radius: 2px;
+      background: rgba(197,165,90,0.5);
+      transition: background 0.3s;
+      animation: waveIdle 1.5s ease-in-out infinite alternate;
+    }
+    .waveform-bars.playing .bar {
+      animation: wavePlay 0.6s ease-in-out infinite alternate;
+      background: #C5A55A;
+    }
+    @keyframes waveIdle {
+      0% { height: 8px; opacity: 0.3; }
+      100% { height: 16px; opacity: 0.5; }
+    }
+    @keyframes wavePlay {
+      0% { height: 10px; }
+      100% { height: 90px; }
+    }
+    .play-btn-wrap {
+      position: relative;
+    }
+    .play-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.8rem 2.2rem;
+      background: rgba(197,165,90,0.15);
+      border: 1px solid rgba(197,165,90,0.4);
+      color: #C5A55A;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.95rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .play-btn:hover {
+      background: rgba(197,165,90,0.25);
+      border-color: #C5A55A;
+    }
+    .play-btn svg { width: 20px; height: 20px; }
+    /* Instrument Cards */
+    .instruments-section {
+      margin-bottom: 4rem;
+    }
+    .instruments-section h2 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.8rem;
+      color: #1B3A5C;
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .instruments-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+    @media (max-width: 768px) {
+      .instruments-grid { grid-template-columns: 1fr; }
+    }
+    .instrument-card {
+      background: #F8F6F0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(27,58,92,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .instrument-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(27,58,92,0.15);
+    }
+    .instrument-img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .instrument-img span {
+      color: rgba(255,255,255,0.5);
+      font-size: 1.8rem;
+      font-family: 'Noto Serif SC', serif;
+    }
+    .instrument-info {
+      padding: 1.5rem;
+    }
+    .instrument-info h3 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.2rem;
+      color: #1B3A5C;
+      margin-bottom: 0.5rem;
+    }
+    .instrument-info p {
+      font-size: 0.9rem;
+      color: #4a4a48;
+      line-height: 1.7;
+    }
+    /* Music Timeline */
+    .music-timeline-section {
+      margin-bottom: 2rem;
+    }
+    .music-timeline-section h2 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.8rem;
+      color: #1B3A5C;
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .timeline {
+      position: relative;
+      max-width: 700px;
+      margin: 0 auto;
+      padding-left: 2.5rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, #1B3A5C, #C5A55A);
+    }
+    .timeline-entry {
+      position: relative;
+      margin-bottom: 2rem;
+      padding-left: 1.5rem;
+    }
+    .timeline-entry::before {
+      content: '';
+      position: absolute;
+      left: -2.5rem;
+      top: 4px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #1B3A5C;
+      border: 3px solid #EDE8DF;
+      box-shadow: 0 0 0 2px #1B3A5C;
+    }
+    .timeline-entry .tl-era {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #C23B22;
+      margin-bottom: 0.3rem;
+    }
+    .timeline-entry .tl-text {
+      font-size: 0.95rem;
+      color: #4a4a48;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar scrolled" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <svg width="32" height="32" viewBox="0 0 100 100"><circle cx="50" cy="20" r="14" fill="none" stroke="#C5A55A" stroke-width="4"/><line x1="50" y1="34" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/><line x1="28" y1="52" x2="72" y2="52" stroke="#C5A55A" stroke-width="4"/><line x1="33" y1="92" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/><line x1="67" y1="92" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/></svg>
+        <span class="logo-text">纳西文化博物馆</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="dictionary.html">东巴文字典</a></li>
+        <li><a href="gallery.html">数字展馆</a></li>
+        <li><a href="music.html">纳西古乐</a></li>
+        <li><a href="explore.html">文化探索</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle" aria-label="菜单"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <ul class="mobile-nav-links">
+      <li><a href="index.html">首页</a></li>
+      <li><a href="dictionary.html">东巴文字典</a></li>
+      <li><a href="gallery.html">数字展馆</a></li>
+      <li><a href="music.html">纳西古乐</a></li>
+      <li><a href="explore.html">文化探索</a></li>
+    </ul>
+  </div>
+
+  <!-- Page Hero -->
+  <section class="page-hero" style="background: linear-gradient(135deg, #1A1A18 0%, #0F2440 50%, #6B4226 100%);">
+    <div style="position:absolute;inset:0;background:rgba(26,26,24,0.45);"></div>
+    <div class="page-hero-content" style="position:relative;z-index:1;text-align:center;padding:8rem 2rem 4rem;">
+      <h1 style="font-family:'Noto Serif SC',serif;font-size:3rem;color:#F8F6F0;margin-bottom:1rem;">纳西古乐</h1>
+      <p style="color:rgba(248,246,240,0.8);font-size:1.1rem;max-width:640px;margin:0 auto;line-height:1.8;">融合道教法事音乐、儒教典礼音乐与唐宋词牌曲，被誉为"中国音乐的活化石"。</p>
+    </div>
+  </section>
+
+  <!-- Breadcrumb -->
+  <div style="background:#F8F6F0;padding:1rem 2rem;border-bottom:1px solid #EDE8DF;">
+    <div style="max-width:1200px;margin:0 auto;font-size:0.85rem;color:#8C8478;">
+      <a href="index.html" style="color:#1B3A5C;text-decoration:none;">首页</a>
+      <span style="margin:0 0.5rem;">/</span>
+      <span style="color:#6B4226;">纳西古乐</span>
+    </div>
+  </div>
+
+  <!-- Page Body -->
+  <section class="page-body" style="padding:4rem 2rem;">
+    <div style="max-width:1200px;margin:0 auto;">
+
+      <!-- Introduction -->
+      <div class="music-intro">
+        <p>纳西古乐是云南省丽江市纳西族世代传承的古典音乐，其历史可追溯至唐宋时期。它是中国乃至世界范围内罕见的、至今仍存活于民间舞台上的古代音乐遗产，融汇了道教法事音乐、儒教典礼音乐以及唐宋词牌曲等多种音乐传统，被音乐学界誉为"中国音乐的活化石"。</p>
+        <p>纳西古乐的演奏以丝竹乐器为主，乐器形制保留了诸多古代特征，如曲项琵琶、竹笛、苏古笃等，在现代乐队中已极为罕见。每逢重大节庆，丽江古城便会响起悠远古朴的乐声，千年旋律回荡在青石巷陌之间，承载着一个民族对文化的敬畏与坚守。</p>
+      </div>
+
+      <!-- Waveform Visualizer -->
+      <div class="music-visualizer">
+        <div class="visualizer-label">
+          正在播放
+          <span class="song-title">《白沙细乐》 — 纳西古乐经典曲目</span>
+        </div>
+        <div class="waveform-bars" id="waveformBars">
+          <!-- Bars generated by JS -->
+        </div>
+        <div class="play-btn-wrap">
+          <button class="play-btn" id="playBtn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
+            播放古乐
+          </button>
+        </div>
+      </div>
+
+      <!-- Video Section -->
+      <div style="max-width:900px;margin:0 auto 4rem;">
+        <h2 style="font-family:'Noto Serif SC',serif;font-size:1.8rem;color:#1B3A5C;text-align:center;margin-bottom:2rem;">古乐实录</h2>
+        <div style="position:relative;width:100%;padding-bottom:56.25%;background:#1A1A18;border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(27,58,92,0.12);">
+          <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
+                  src="https://www.youtube.com/embed/pJK2DQR_ATc"
+                  title="纳西古乐演奏实录"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen></iframe>
+        </div>
+        <p style="text-align:center;margin-top:1rem;font-size:0.85rem;color:#8C8478;">丽江大研纳西古乐会完整演出实录</p>
+      </div>
+
+      <!-- Instruments -->
+      <div class="instruments-section">
+        <h2>乐器展示</h2>
+        <div class="instruments-grid">
+
+          <div class="instrument-card">
+            <div class="instrument-img" style="background-image:url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&q=60');background-size:cover;background-position:center;">
+            </div>
+            <div class="instrument-info">
+              <h3>曲项琵琶</h3>
+              <p>曲项琵琶是中国古代琵琶的重要形制，琴颈弯曲，四弦，音色浑厚悠远。纳西古乐中保留的曲项琵琶形制已逾千年，在其他地区已极为罕见。</p>
+            </div>
+          </div>
+
+          <div class="instrument-card">
+            <div class="instrument-img" style="background-image:url('https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=600&q=60');background-size:cover;background-position:center;">
+            </div>
+            <div class="instrument-info">
+              <h3>竹笛</h3>
+              <p>竹笛是纳西古乐中不可或缺的旋律乐器，以本地毛竹制作，音色清亮婉转。演奏技法保留了古代"气颤音"等传统技巧，具有鲜明的地方特色。</p>
+            </div>
+          </div>
+
+          <div class="instrument-card">
+            <div class="instrument-img" style="background-image:url('https://images.unsplash.com/photo-1550918161-b66607393ced?w=600&q=60');background-size:cover;background-position:center;">
+            </div>
+            <div class="instrument-info">
+              <h3>苏古笃</h3>
+              <p>苏古笃是纳西族特有的拨弦乐器，形似小型竖琴，音色柔美空灵。相传源自唐代，经纳西族艺人世代改良，成为纳西古乐演奏中的灵魂乐器。</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Music History Timeline -->
+      <div class="music-timeline-section">
+        <h2>古乐历史</h2>
+        <div class="timeline">
+          <div class="timeline-entry">
+            <div class="tl-era">唐宋时期</div>
+            <div class="tl-text">道教法事音乐与儒教典礼音乐随文化交流传入丽江，与纳西族本土音乐融合，形成纳西古乐的雏形。唐宋词牌曲的旋律被纳西族艺人吸收传承，成为古乐的重要组成。</div>
+          </div>
+          <div class="timeline-entry">
+            <div class="tl-era">明清传承</div>
+            <div class="tl-text">纳西土司木氏家族大力扶持古乐发展，设立专门乐班，修建演奏场所。古乐成为丽江社会生活中不可或缺的文化活动，在宫廷与民间广泛传承。</div>
+          </div>
+          <div class="timeline-entry">
+            <div class="tl-era">1980年代复兴</div>
+            <div class="tl-text">在宣科等文化人士的推动下，丽江大研纳西古乐会成立，开始系统整理古乐谱、恢复传统曲目，并举办公开演出，使沉寂多年的纳西古乐重新焕发生机。</div>
+          </div>
+          <div class="timeline-entry">
+            <div class="tl-era">当代保护</div>
+            <div class="tl-text">纳西古乐被列入国家级非物质文化遗产名录，建立了完善的传承人培养机制。数字化录音与影像存档工作同步推进，确保千年古韵永续传承。</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <a href="index.html" class="footer-logo"><svg width="32" height="32" viewBox="0 0 100 100"><circle cx="50" cy="20" r="14" fill="none" stroke="#C5A55A" stroke-width="4"/><line x1="50" y1="34" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/><line x1="28" y1="52" x2="72" y2="52" stroke="#C5A55A" stroke-width="4"/><line x1="33" y1="92" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/><line x1="67" y1="92" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/></svg><span>纳西文化博物馆</span></a>
+        <p class="footer-desc">守护千年东巴文明，传承纳西文化精髓。</p>
+      </div>
+      <div class="footer-nav"><h4>探索</h4><ul><li><a href="dictionary.html">东巴文字典</a></li><li><a href="gallery.html">数字展馆</a></li><li><a href="music.html">纳西古乐</a></li><li><a href="explore.html">文化探索</a></li></ul></div>
+      <div class="footer-nav"><h4>页面</h4><ul><li><a href="index.html">首页</a></li><li><a href="dictionary.html">东巴文字典</a></li><li><a href="gallery.html">数字展馆</a></li><li><a href="explore.html">文化探索</a></li></ul></div>
+      <div class="footer-social"><h4>关注我们</h4><div class="social-icons"><a href="#" aria-label="微信"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-2.5 3c-3.5 0-6.5-2.5-6.5-5.5S7.5 3 11 3s6.5 2.5 6.5 5.5-3 5.5-6.5 5.5z"/></svg></a></div></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 纳西文化博物馆 &middot; 保留所有权利</p></div>
+  </footer>
+
+  <script src="js/animations.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+  (function(){
+    var bars = document.getElementById('waveformBars');
+    var playBtn = document.getElementById('playBtn');
+    if(!bars || !playBtn) return;
+
+    // Generate bars
+    var barCount = 60;
+    for(var i = 0; i < barCount; i++){
+      var bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.style.animationDelay = (Math.random() * 1.5).toFixed(2) + 's';
+      bars.appendChild(bar);
+    }
+
+    var playing = false;
+    playBtn.addEventListener('click', function(){
+      playing = !playing;
+      if(playing){
+        bars.classList.add('playing');
+        playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg> 暂停';
+      } else {
+        bars.classList.remove('playing');
+        playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><polygon points="6,3 20,12 6,21"/></svg> 播放古乐';
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1B3A5C">
+  <title>数字展馆 — 纳西文化博物馆</title>
+    <meta name="theme-color" content="#1B3A5C">
+<meta name="description" content="高清展示纳西族文化珍品，涵盖东巴经书、纳西古乐、蓝印花布、古城建筑等。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Gallery Filter Tabs */
+    .gallery-filters {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 0.6rem 1.6rem;
+      border: 2px solid #1B3A5C;
+      background: transparent;
+      color: #1B3A5C;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border-radius: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: #1B3A5C;
+      color: #F8F6F0;
+    }
+    /* Gallery Grid */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    @media (max-width: 900px) {
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .gallery-grid { grid-template-columns: 1fr; }
+    }
+    .gallery-item {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      cursor: pointer;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .gallery-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(27, 58, 92, 0.18);
+    }
+    .gallery-item .placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gallery-item .placeholder span {
+      color: rgba(255,255,255,0.6);
+      font-size: 2.5rem;
+      font-family: 'Noto Serif SC', serif;
+      font-weight: 700;
+      user-select: none;
+    }
+    .gallery-item .item-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(26,26,24,0.85) 0%, rgba(26,26,24,0.2) 50%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.5rem;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .gallery-item:hover .item-overlay {
+      opacity: 1;
+    }
+    .item-overlay h3 {
+      color: #F8F6F0;
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.2rem;
+      margin-bottom: 0.3rem;
+    }
+    .item-overlay p {
+      color: rgba(248,246,240,0.75);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    /* Lightbox */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(26,26,24,0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .lightbox-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .lightbox-content {
+      max-width: 800px;
+      width: 90%;
+      border-radius: 12px;
+      overflow: hidden;
+      transform: scale(0.9);
+      transition: transform 0.4s ease;
+    }
+    .lightbox-overlay.active .lightbox-content {
+      transform: scale(1);
+    }
+    .lightbox-content .lb-image {
+      width: 100%;
+      aspect-ratio: 4/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox-content .lb-image span {
+      color: rgba(255,255,255,0.5);
+      font-size: 3rem;
+      font-family: 'Noto Serif SC', serif;
+      font-weight: 700;
+    }
+    .lightbox-info {
+      background: #1A1A18;
+      padding: 1.5rem 2rem;
+    }
+    .lightbox-info h3 {
+      color: #F8F6F0;
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.3rem;
+      margin-bottom: 0.4rem;
+    }
+    .lightbox-info p {
+      color: rgba(248,246,240,0.7);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: none;
+      border: none;
+      color: #F8F6F0;
+      font-size: 2rem;
+      cursor: pointer;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s;
+    }
+    .lightbox-close:hover { opacity: 0.7; }
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(248,246,240,0.1);
+      border: none;
+      color: #F8F6F0;
+      font-size: 1.5rem;
+      cursor: pointer;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+    .lightbox-nav:hover { background: rgba(248,246,240,0.2); }
+    .lightbox-prev { left: 1.5rem; }
+    .lightbox-next { right: 1.5rem; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar scrolled" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <svg width="32" height="32" viewBox="0 0 100 100"><circle cx="50" cy="20" r="14" fill="none" stroke="#C5A55A" stroke-width="4"/><line x1="50" y1="34" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/><line x1="28" y1="52" x2="72" y2="52" stroke="#C5A55A" stroke-width="4"/><line x1="33" y1="92" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/><line x1="67" y1="92" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/></svg>
+        <span class="logo-text">纳西文化博物馆</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">首页</a></li>
+        <li><a href="dictionary.html">东巴文字典</a></li>
+        <li><a href="gallery.html">数字展馆</a></li>
+        <li><a href="music.html">纳西古乐</a></li>
+        <li><a href="explore.html">文化探索</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle" aria-label="菜单"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <ul class="mobile-nav-links">
+      <li><a href="index.html">首页</a></li>
+      <li><a href="dictionary.html">东巴文字典</a></li>
+      <li><a href="gallery.html">数字展馆</a></li>
+      <li><a href="music.html">纳西古乐</a></li>
+      <li><a href="explore.html">文化探索</a></li>
+    </ul>
+  </div>
+
+  <!-- Page Hero -->
+  <section class="page-hero" style="background: linear-gradient(135deg, #1B3A5C 0%, #0F2440 50%, #1A1A18 100%);">
+    <div style="position:absolute;inset:0;background:rgba(26,26,24,0.4);"></div>
+    <div class="page-hero-content" style="position:relative;z-index:1;text-align:center;padding:8rem 2rem 4rem;">
+      <h1 style="font-family:'Noto Serif SC',serif;font-size:3rem;color:#F8F6F0;margin-bottom:1rem;">数字展馆</h1>
+      <p style="color:rgba(248,246,240,0.8);font-size:1.1rem;max-width:640px;margin:0 auto;line-height:1.8;">高清展示纳西族文化珍品，涵盖东巴经书、纳西古乐、蓝印花布、古城建筑等。</p>
+    </div>
+  </section>
+
+  <!-- Breadcrumb -->
+  <div style="background:#F8F6F0;padding:1rem 2rem;border-bottom:1px solid #EDE8DF;">
+    <div style="max-width:1200px;margin:0 auto;font-size:0.85rem;color:#8C8478;">
+      <a href="index.html" style="color:#1B3A5C;text-decoration:none;">首页</a>
+      <span style="margin:0 0.5rem;">/</span>
+      <span style="color:#6B4226;">数字展馆</span>
+    </div>
+  </div>
+
+  <!-- Page Body -->
+  <section class="page-body" style="padding:4rem 2rem;">
+    <div style="max-width:1200px;margin:0 auto;">
+
+      <!-- Filter Tabs -->
+      <div class="gallery-filters">
+        <button class="filter-btn active" data-filter="all">全部</button>
+        <button class="filter-btn" data-filter="dongba">东巴文献</button>
+        <button class="filter-btn" data-filter="craft">传统技艺</button>
+        <button class="filter-btn" data-filter="arch">建筑服饰</button>
+      </div>
+
+      <!-- Gallery Grid -->
+      <div class="gallery-grid" id="galleryGrid">
+
+        <div class="gallery-item" data-category="dongba" data-index="0"
+             data-title="东巴经书" data-desc="东巴经书是纳西族东巴祭司用东巴象形文字书写的宗教典籍，内容涵盖神话、历史、哲学、天文、医学等领域，是研究纳西族文化的核心文献。">
+          <div class="placeholder placeholder-dongba-script"><span style="display:none;">东巴经书</span></div>
+          <div class="item-overlay"><h3>东巴经书</h3><p>东巴象形文字书写的宗教典籍，纳西族文化瑰宝</p></div>
+        </div>
+
+        <div class="gallery-item" data-category="dongba" data-index="1"
+             data-title="纳西古乐乐谱" data-desc="纳西古乐融合了道教法事音乐、儒教典礼音乐与唐宋词牌曲，其乐谱工整严谨，记录了千年来音乐传承的脉络。">
+          <div class="placeholder placeholder-naxi-music"><span style="display:none;">纳西古乐</span></div>
+          <div class="item-overlay"><h3>纳西古乐乐谱</h3><p>千年古谱，中国音乐的活化石</p></div>
+        </div>
+
+        <div class="gallery-item" data-category="craft" data-index="2"
+             data-title="蓝印花布" data-desc="蓝印花布是纳西族传统手工印染技艺的代表，以蓝靛为染料，运用漏印工艺在白布上印出精美图案，纹样多为花鸟鱼虫与吉祥符号。">
+          <div class="placeholder placeholder-blue-calico"><span style="display:none;">蓝印花布</span></div>
+          <div class="item-overlay"><h3>蓝印花布</h3><p>传统手工印染技艺，蓝白之间的古朴之美</p></div>
+        </div>
+
+        <div class="gallery-item" data-category="arch" data-index="3"
+             data-title="古城木楼" data-desc="丽江古城建筑融合纳西、汉、藏等多民族风格，以土木结构为主，飞檐翘角、雕花门窗，体现出人与自然和谐共处的建筑理念。">
+          <div class="placeholder placeholder-ancient-city"><span style="display:none;">古城木楼</span></div>
+          <div class="item-overlay"><h3>古城木楼</h3><p>纳西族传统建筑，世界文化遗产的活态见证</p></div>
+        </div>
+
+        <div class="gallery-item" data-category="arch" data-index="4"
+             data-title="七星披肩" data-desc="七星披肩是纳西族妇女的传统服饰，披肩上绣有七颗星星，象征着纳西族妇女"披星戴月"的勤劳精神，是纳西族文化的重要标志。">
+          <div class="placeholder placeholder-naxi-costume"><span style="display:none;">七星披肩</span></div>
+          <div class="item-overlay"><h3>七星披肩</h3><p>纳西族妇女传统服饰，披星戴月的文化象征</p></div>
+        </div>
+
+        <div class="gallery-item" data-category="dongba" data-index="5"
+             data-title="东巴画" data-desc="东巴画是东巴祭司在宗教仪式中使用的绘画艺术，以天然矿物颜料绘制，色彩浓烈，形象奇特，兼具宗教神圣感与艺术审美价值。">
+          <div class="placeholder placeholder-dongba-script"><span style="display:none;">东巴画</span></div>
+          <div class="item-overlay"><h3>东巴画</h3><p>东巴祭司的神圣绘画，色彩浓烈的宗教艺术</p></div>
+        </div>
+
+        <div class="gallery-item" data-category="dongba" data-index="6"
+             data-title="东巴木牌画" data-desc="东巴木牌画是刻绘在木牌上的东巴图画文字，用于宗教仪式中的祭祀活动。每块木牌上绘有神灵、鬼怪或自然物象，线条粗犷有力。">
+          <div class="placeholder placeholder-wood-tablet"><span style="display:none;">木牌画</span></div>
+          <div class="item-overlay"><h3>东巴木牌画</h3><p>木牌上的图画文字，祭祀仪式的神圣载体</p></div>
+        </div>
+
+        <div class="gallery-item" data-category="craft" data-index="7"
+             data-title="纳西银器" data-desc="纳西族银器工艺历史悠久，制品包括银饰、银壶、银碗等，纹饰精美，工艺精湛，兼具实用性与艺术性，是纳西族重要的手工艺品。">
+          <div class="placeholder placeholder-silverware"><span style="display:none;">纳西银器</span></div>
+          <div class="item-overlay"><h3>纳西银器</h3><p>精湛银器工艺，纳西族手工艺的杰出代表</p></div>
+        </div>
+
+        <div class="gallery-item" data-category="arch" data-index="8"
+             data-title="古城石桥" data-desc="丽江古城内分布着三百多座石桥，最早的建于明清时期，石桥与流水、民居相映成趣，构成了"小桥流水人家"的诗意画卷。">
+          <div class="placeholder placeholder-stone-bridge"><span style="display:none;">古城石桥</span></div>
+          <div class="item-overlay"><h3>古城石桥</h3><p>三百余座古石桥，小桥流水的诗意画卷</p></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div class="lightbox-overlay" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose">&times;</button>
+    <button class="lightbox-nav lightbox-prev" id="lightboxPrev">&#8249;</button>
+    <button class="lightbox-nav lightbox-next" id="lightboxNext">&#8250;</button>
+    <div class="lightbox-content">
+      <div class="lb-image" id="lightboxImage"></div>
+      <div class="lightbox-info">
+        <h3 id="lightboxTitle"></h3>
+        <p id="lightboxDesc"></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <a href="index.html" class="footer-logo"><svg width="32" height="32" viewBox="0 0 100 100"><circle cx="50" cy="20" r="14" fill="none" stroke="#C5A55A" stroke-width="4"/><line x1="50" y1="34" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/><line x1="28" y1="52" x2="72" y2="52" stroke="#C5A55A" stroke-width="4"/><line x1="33" y1="92" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/><line x1="67" y1="92" x2="50" y2="78" stroke="#C5A55A" stroke-width="4"/></svg><span>纳西文化博物馆</span></a>
+        <p class="footer-desc">守护千年东巴文明，传承纳西文化精髓。</p>
+      </div>
+      <div class="footer-nav"><h4>探索</h4><ul><li><a href="dictionary.html">东巴文字典</a></li><li><a href="gallery.html">数字展馆</a></li><li><a href="music.html">纳西古乐</a></li><li><a href="explore.html">文化探索</a></li></ul></div>
+      <div class="footer-nav"><h4>页面</h4><ul><li><a href="index.html">首页</a></li><li><a href="dictionary.html">东巴文字典</a></li><li><a href="gallery.html">数字展馆</a></li><li><a href="explore.html">文化探索</a></li></ul></div>
+      <div class="footer-social"><h4>关注我们</h4><div class="social-icons"><a href="#" aria-label="微信"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-2.5 3c-3.5 0-6.5-2.5-6.5-5.5S7.5 3 11 3s6.5 2.5 6.5 5.5-3 5.5-6.5 5.5z"/></svg></a></div></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 纳西文化博物馆 &middot; 保留所有权利</p></div>
+  </footer>
+
+  <script src="js/animations.js"></script>
+  <script src="js/lightbox.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
