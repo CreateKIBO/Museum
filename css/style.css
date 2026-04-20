@@ -341,7 +341,7 @@ body:hover .custom-cursor { opacity: 0.6; }
       rgba(27,58,92,0.3) 70%,
       rgba(248,246,240,0.2) 100%
     ),
-    url('https://images.unsplash.com/photo-1677922069769-0164b29e2c1a?w=1920&q=80') center/cover no-repeat;
+    url('../古城建筑/木楼/古城木楼2.jpg') center/cover no-repeat;
   animation: kenBurns 25s ease-in-out infinite alternate;
 }
 @keyframes kenBurns {
@@ -460,14 +460,6 @@ body:hover .custom-cursor { opacity: 0.6; }
 .marquee-track {
   display: flex;
   will-change: transform;
-  animation: marqueeScroll 30s linear infinite;
-  transition: none;
-}
-.marquee-row-right .marquee-track {
-  animation: marqueeScrollReverse 35s linear infinite;
-}
-.marquee-row:hover .marquee-track {
-  animation-play-state: paused;
 }
 .marquee-item {
   display: flex;
@@ -485,14 +477,6 @@ body:hover .custom-cursor { opacity: 0.6; }
 .marquee-item span {
   font-size: 0.8rem;
   opacity: 0.6;
-}
-@keyframes marqueeScroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(calc(-50% + 1.5rem)); }
-}
-@keyframes marqueeScrollReverse {
-  0% { transform: translateX(calc(-50% + 1.5rem)); }
-  100% { transform: translateX(0); }
 }
 
 /* ==================== Section 3: About ==================== */
@@ -533,7 +517,7 @@ body:hover .custom-cursor { opacity: 0.6; }
 .placeholder-lijiang {
   background:
     linear-gradient(180deg, rgba(107,66,38,0.2) 0%, rgba(27,58,92,0.3) 100%),
-    url('https://images.unsplash.com/photo-1609478654983-8a8e18ddc5ba?w=800&q=60') center/cover no-repeat;
+    url('../古城建筑/木楼/古城木楼.jpg') center/cover no-repeat;
   position: relative;
 }
 .placeholder-lijiang::after {
@@ -716,55 +700,55 @@ body:hover .custom-cursor { opacity: 0.6; }
 /* Gallery placeholder backgrounds — real images with gradient fallback */
 .placeholder-dongba-script {
   background: linear-gradient(135deg, #EDE8DF 0%, #C5A55A 40%, #8C8478 100%);
-  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Naxi_manuscript_%28right%29_2088.jpg/500px-Naxi_manuscript_%28right%29_2088.jpg');
+  background-image: url('../东巴文化/东巴经书/东巴经书.jpg');
   background-size: cover;
   background-position: center;
 }
 .placeholder-naxi-music {
   background: linear-gradient(135deg, #1A1A18 0%, #6B4226 50%, #1B3A5C 100%);
-  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Naxi_Musicians_I.jpg/800px-Naxi_Musicians_I.jpg');
+  background-image: url('../纳西古乐/纳西古乐.jpg');
   background-size: cover;
   background-position: center;
 }
 .placeholder-blue-calico {
   background: linear-gradient(135deg, #1B3A5C 0%, #2d5a8a 40%, #F8F6F0 60%, #1B3A5C 100%);
-  background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=60');
+  background-image: url('../纳西服饰/蓝印花布/蓝印花布1.jpg');
   background-size: cover;
   background-position: center;
 }
 .placeholder-ancient-city {
   background: linear-gradient(135deg, #8C8478 0%, #6B4226 50%, #D4CFC6 100%);
-  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Lijiang_Yunnan_Old-town-03.jpg/800px-Lijiang_Yunnan_Old-town-03.jpg');
+  background-image: url('../古城建筑/木楼/古城木楼.jpg');
   background-size: cover;
   background-position: center;
 }
 .placeholder-naxi-costume {
   background: linear-gradient(135deg, #C23B22 0%, #6B4226 40%, #C5A55A 80%, #1B3A5C 100%);
-  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Lijiang_Yunnan_China-Traditional-clothing-of-a-Naxi-woman-01.jpg/800px-Lijiang_Yunnan_China-Traditional-clothing-of-a-Naxi-woman-01.jpg');
+  background-image: url('../纳西服饰/七星披肩/七星披肩.jpg');
   background-size: cover;
   background-position: center;
 }
 .placeholder-dongba-painting {
   background: linear-gradient(135deg, #C23B22 0%, #C5A55A 40%, #1B3A5C 100%);
-  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Dongba-protect_water_resources.jpg/800px-Dongba-protect_water_resources.jpg');
+  background-image: url('../东巴文化/东巴画/东巴画.jpg');
   background-size: cover;
   background-position: center;
 }
 .placeholder-wood-tablet {
   background: linear-gradient(135deg, #3a2518 0%, #6B4226 50%, #3a2518 100%);
-  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Dongba_wood_carving.jpg/800px-Dongba_wood_carving.jpg');
+  background-image: url('../东巴文化/东巴木牌画/东巴木牌画.jpg');
   background-size: cover;
   background-position: center;
 }
 .placeholder-silverware {
   background: linear-gradient(135deg, #D4CFC6 0%, #8C8478 50%, #C5A55A 100%);
-  background-image: url('https://images.unsplash.com/photo-1576033628095-f92e2558e91b?w=800&q=60');
+  background-image: url('../纳西银器/丽江银器.jpg');
   background-size: cover;
   background-position: center;
 }
 .placeholder-stone-bridge {
   background: linear-gradient(135deg, #8C8478 0%, #1B3A5C 50%, #D4CFC6 100%);
-  background-image: url('https://images.unsplash.com/photo-1561185367-7b959f361f6?w=800&q=60');
+  background-image: url('../古城建筑/石桥/石桥.jpg');
   background-size: cover;
   background-position: center;
 }
@@ -1032,7 +1016,7 @@ body:hover .custom-cursor { opacity: 0.6; }
 .placeholder-dongba-ritual {
   background:
     linear-gradient(135deg, rgba(15,36,64,0.3) 0%, rgba(194,59,34,0.2) 40%, rgba(197,165,90,0.2) 100%),
-    url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Dongba_pictographic_glyphs_-_Lijiang.jpg/800px-Dongba_pictographic_glyphs_-_Lijiang.jpg') center/cover no-repeat;
+    url('../东巴文化/东巴祭司/hejiren.jpg') center/cover no-repeat;
   width: 100%;
   height: 100%;
   min-height: 350px;
@@ -1040,7 +1024,7 @@ body:hover .custom-cursor { opacity: 0.6; }
 .placeholder-naxi-orchestra {
   background:
     linear-gradient(135deg, rgba(26,26,24,0.3) 0%, rgba(107,66,38,0.2) 50%, rgba(197,165,90,0.2) 100%),
-    url('https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Naxi_Musicians_I.jpg/800px-Naxi_Musicians_I.jpg') center/cover no-repeat;
+    url('../纳西古乐/纳西古乐会.jpg') center/cover no-repeat;
   width: 100%;
   height: 100%;
   min-height: 350px;

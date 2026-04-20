@@ -89,6 +89,7 @@
   // === Music play button ===
   const musicPlayBtn = document.getElementById('musicPlayBtn');
   const musicVisualizer = document.getElementById('musicVisualizer');
+  const bgMusic = document.getElementById('bgMusic');
   if (musicPlayBtn && musicVisualizer) {
     let isPlaying = false;
     musicPlayBtn.addEventListener('click', () => {
@@ -96,9 +97,11 @@
       if (isPlaying) {
         musicVisualizer.classList.add('playing');
         musicPlayBtn.querySelector('span').textContent = '暂停播放';
+        if (bgMusic) bgMusic.play();
       } else {
         musicVisualizer.classList.remove('playing');
         musicPlayBtn.querySelector('span').textContent = '聆听古乐';
+        if (bgMusic) bgMusic.pause();
       }
     });
   }
