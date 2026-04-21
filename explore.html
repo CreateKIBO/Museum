@@ -20,6 +20,14 @@
       margin-bottom: 4rem;
       padding-bottom: 4rem;
       border-bottom: 1px solid #EDE8DF;
+      position: relative;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .story-block.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
     .story-block:last-of-type {
       border-bottom: none;
@@ -30,11 +38,25 @@
     .story-image {
       flex: 0 0 45%;
       aspect-ratio: 4/3;
-      border-radius: 12px;
+      border-radius: 16px;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+      transition: transform 0.5s ease, box-shadow 0.5s ease;
+    }
+    .story-block:hover .story-image {
+      transform: scale(1.02);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+    }
+    .story-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(197,165,90,0.1), transparent);
+      pointer-events: none;
     }
     .story-image span {
       color: rgba(255,255,255,0.5);
@@ -50,6 +72,18 @@
       font-size: 1.6rem;
       color: #1B3A5C;
       margin-bottom: 1rem;
+      position: relative;
+      padding-left: 1.2rem;
+    }
+    .story-text h2::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.2em;
+      bottom: 0.2em;
+      width: 4px;
+      background: linear-gradient(180deg, #1B3A5C, #C5A55A);
+      border-radius: 2px;
     }
     .story-text p {
       font-size: 1rem;
@@ -59,10 +93,21 @@
     }
     .story-text blockquote {
       border-left: 3px solid #C5A55A;
-      padding: 0.8rem 1.2rem;
+      padding: 1rem 1.5rem;
       margin: 1.2rem 0;
-      background: rgba(197,165,90,0.06);
-      border-radius: 0 8px 8px 0;
+      background: linear-gradient(135deg, rgba(197,165,90,0.06), rgba(197,165,90,0.02));
+      border-radius: 0 12px 12px 0;
+      position: relative;
+    }
+    .story-text blockquote::before {
+      content: '\201C';
+      position: absolute;
+      top: -0.2rem;
+      left: 0.5rem;
+      font-size: 2.5rem;
+      color: rgba(197,165,90,0.2);
+      font-family: serif;
+      line-height: 1;
     }
     .story-text blockquote p {
       font-style: italic;
@@ -91,6 +136,18 @@
       color: #1B3A5C;
       text-align: center;
       margin-bottom: 2.5rem;
+      position: relative;
+    }
+    .heritage-timeline-section h2::after {
+      content: '';
+      position: absolute;
+      bottom: -0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #1B3A5C, #C5A55A, #C23B22);
+      border-radius: 2px;
     }
     .heritage-timeline {
       position: relative;
@@ -99,7 +156,12 @@
       padding: 0;
       gap: 0;
       scroll-snap-type: x mandatory;
+      scrollbar-width: thin;
+      scrollbar-color: #C5A55A #EDE8DF;
     }
+    .heritage-timeline::-webkit-scrollbar { height: 6px; }
+    .heritage-timeline::-webkit-scrollbar-track { background: #EDE8DF; border-radius: 3px; }
+    .heritage-timeline::-webkit-scrollbar-thumb { background: #C5A55A; border-radius: 3px; }
     .heritage-timeline-line {
       position: absolute;
       left: 0;
@@ -108,6 +170,7 @@
       background: linear-gradient(to right, #1B3A5C, #C5A55A, #C23B22);
       z-index: 0;
       pointer-events: none;
+      border-radius: 2px;
     }
     .heritage-milestone {
       position: relative;
@@ -117,6 +180,17 @@
       padding-right: 1.5rem;
       padding-bottom: 1.5rem;
       scroll-snap-align: start;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: milestoneIn 0.6s ease forwards;
+    }
+    .heritage-milestone:nth-child(1) { animation-delay: 0.1s; }
+    .heritage-milestone:nth-child(2) { animation-delay: 0.2s; }
+    .heritage-milestone:nth-child(3) { animation-delay: 0.3s; }
+    .heritage-milestone:nth-child(4) { animation-delay: 0.4s; }
+    .heritage-milestone:nth-child(5) { animation-delay: 0.5s; }
+    @keyframes milestoneIn {
+      to { opacity: 1; transform: translateY(0); }
     }
     .heritage-milestone::before {
       content: '';
@@ -124,12 +198,12 @@
       top: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
-      background: #C23B22;
+      background: linear-gradient(135deg, #C23B22, #C5A55A);
       border: 3px solid #EDE8DF;
-      box-shadow: 0 0 0 3px #C23B22;
+      box-shadow: 0 0 0 3px rgba(194,59,34,0.3);
       z-index: 1;
     }
     .heritage-milestone .ms-year {
@@ -155,12 +229,17 @@
     }
     .ms-img {
       margin-top: 0.8rem;
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
       aspect-ratio: 16/9;
       background-size: cover;
       background-position: center;
       background-color: #EDE8DF;
+      transition: transform 0.4s ease;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+    .heritage-milestone:hover .ms-img {
+      transform: scale(1.05);
     }
     @media (max-width: 768px) {
       .heritage-milestone {
@@ -199,8 +278,8 @@
   </div>
 
   <!-- Page Hero -->
-  <section class="page-hero" style="background: linear-gradient(135deg, #0F2440 0%, #1B3A5C 50%, #C23B22 100%);">
-    <div style="position:absolute;inset:0;background:rgba(26,26,24,0.4);"></div>
+  <section class="page-hero" style="background: url('古城建筑/木楼/古城木楼.jpg') center/cover no-repeat;">
+    <div style="position:absolute;inset:0;background: linear-gradient(135deg, rgba(15,36,64,0.75) 0%, rgba(27,58,92,0.6) 50%, rgba(194,59,34,0.5) 100%);"></div>
     <div class="page-hero-content" style="position:relative;z-index:1;text-align:center;padding:8rem 2rem 4rem;">
       <h1 style="font-family:'Noto Serif SC',serif;font-size:3rem;color:#F8F6F0;margin-bottom:1rem;">文化探索</h1>
       <p style="color:rgba(248,246,240,0.8);font-size:1.1rem;max-width:640px;margin:0 auto;line-height:1.8;">深入了解纳西族文化的前世今生，探索东巴祭司的传承之路。</p>
@@ -341,6 +420,22 @@
     }
     resizeLine();
     window.addEventListener('resize', resizeLine);
+
+    // Story block scroll animation
+    var storyBlocks = document.querySelectorAll('.story-block');
+    if (storyBlocks.length) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.2 });
+
+      storyBlocks.forEach(function(block) {
+        observer.observe(block);
+      });
+    }
   })();
   </script>
 </body>

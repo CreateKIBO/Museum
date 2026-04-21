@@ -28,18 +28,29 @@
     .music-visualizer {
       max-width: 900px;
       margin: 0 auto 4rem;
-      background: linear-gradient(135deg, #1A1A18 0%, #1B3A5C 100%);
-      border-radius: 16px;
-      padding: 2.5rem;
+      background: linear-gradient(135deg, #1A1A18 0%, #1B3A5C 50%, #0F2440 100%);
+      border-radius: 20px;
+      padding: 3rem;
       text-align: center;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 20px 60px rgba(27, 58, 92, 0.3);
     }
     .music-visualizer::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse at center, rgba(197,165,90,0.08) 0%, transparent 70%);
+      background: radial-gradient(ellipse at 30% 30%, rgba(197,165,90,0.15) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 70%, rgba(194,59,34,0.1) 0%, transparent 50%);
+    }
+    .music-visualizer::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(197,165,90,0.5), transparent);
     }
     .visualizer-label {
       position: relative;
@@ -52,7 +63,7 @@
       display: block;
       color: #C5A55A;
       font-family: 'Noto Serif SC', serif;
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       margin-top: 0.3rem;
       letter-spacing: 0;
     }
@@ -69,13 +80,13 @@
     .waveform-bars .bar {
       width: 4px;
       border-radius: 2px;
-      background: rgba(197,165,90,0.5);
+      background: linear-gradient(180deg, #C5A55A, rgba(197,165,90,0.3));
       transition: background 0.3s;
       animation: waveIdle 1.5s ease-in-out infinite alternate;
     }
     .waveform-bars.playing .bar {
       animation: wavePlay 0.6s ease-in-out infinite alternate;
-      background: #C5A55A;
+      background: linear-gradient(180deg, #C5A55A, #C23B22);
     }
     @keyframes waveIdle {
       0% { height: 8px; opacity: 0.3; }
@@ -92,21 +103,33 @@
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
-      padding: 0.8rem 2.2rem;
-      background: rgba(197,165,90,0.15);
-      border: 1px solid rgba(197,165,90,0.4);
+      padding: 1rem 2.5rem;
+      background: linear-gradient(135deg, rgba(197,165,90,0.2), rgba(197,165,90,0.1));
+      border: 1px solid rgba(197,165,90,0.5);
       color: #C5A55A;
       font-family: 'Noto Sans SC', sans-serif;
       font-size: 0.95rem;
-      border-radius: 2rem;
+      border-radius: 3rem;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
     }
+    .play-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(197,165,90,0.3), rgba(197,165,90,0.15));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .play-btn:hover::before { opacity: 1; }
     .play-btn:hover {
-      background: rgba(197,165,90,0.25);
-      border-color: #C5A55A;
+      transform: scale(1.05);
+      box-shadow: 0 10px 30px rgba(197,165,90,0.3);
     }
-    .play-btn svg { width: 20px; height: 20px; }
+    .play-btn svg { width: 20px; height: 20px; position: relative; z-index: 1; }
+    .play-btn span { position: relative; z-index: 1; }
     /* Instrument Cards */
     .instruments-section {
       margin-bottom: 4rem;
@@ -117,6 +140,18 @@
       color: #1B3A5C;
       text-align: center;
       margin-bottom: 2.5rem;
+      position: relative;
+    }
+    .instruments-section h2::after {
+      content: '';
+      position: absolute;
+      bottom: -0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #C5A55A, #C23B22);
+      border-radius: 2px;
     }
     .instruments-grid {
       display: grid;
@@ -127,22 +162,58 @@
       .instruments-grid { grid-template-columns: 1fr; }
     }
     .instrument-card {
-      background: #F8F6F0;
-      border-radius: 12px;
+      background: linear-gradient(135deg, #F8F6F0, #EDE8DF);
+      border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 4px 20px rgba(27,58,92,0.08);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 8px 30px rgba(27,58,92,0.1);
+      transition: all 0.4s ease;
+      position: relative;
+      cursor: pointer;
+    }
+    .instrument-card::after {
+      content: '查看详情 →';
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      font-size: 0.75rem;
+      color: #C5A55A;
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: all 0.3s ease;
+    }
+    .instrument-card:hover::after {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .instrument-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #1B3A5C, #C5A55A);
+      opacity: 0;
+      transition: opacity 0.3s;
     }
     .instrument-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 30px rgba(27,58,92,0.15);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(27,58,92,0.2);
     }
+    .instrument-card:hover::before { opacity: 1; }
     .instrument-img {
       width: 100%;
       aspect-ratio: 4/3;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+    }
+    .instrument-img::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 60%, rgba(26,26,24,0.2) 100%);
     }
     .instrument-img span {
       color: rgba(255,255,255,0.5);
@@ -151,6 +222,7 @@
     }
     .instrument-info {
       padding: 1.5rem;
+      position: relative;
     }
     .instrument-info h3 {
       font-family: 'Noto Serif SC', serif;
@@ -173,6 +245,18 @@
       color: #1B3A5C;
       text-align: center;
       margin-bottom: 2.5rem;
+      position: relative;
+    }
+    .music-timeline-section h2::after {
+      content: '';
+      position: absolute;
+      bottom: -0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #C5A55A, #C23B22);
+      border-radius: 2px;
     }
     .timeline {
       position: relative;
@@ -186,25 +270,37 @@
       left: 8px;
       top: 0;
       bottom: 0;
-      width: 2px;
-      background: linear-gradient(to bottom, #1B3A5C, #C5A55A);
+      width: 3px;
+      background: linear-gradient(to bottom, #1B3A5C, #C5A55A, #C23B22);
+      border-radius: 2px;
     }
     .timeline-entry {
       position: relative;
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
       padding-left: 1.5rem;
+      opacity: 0;
+      transform: translateX(-20px);
+      animation: timelineFadeIn 0.6s ease forwards;
+    }
+    .timeline-entry:nth-child(1) { animation-delay: 0.1s; }
+    .timeline-entry:nth-child(2) { animation-delay: 0.2s; }
+    .timeline-entry:nth-child(3) { animation-delay: 0.3s; }
+    .timeline-entry:nth-child(4) { animation-delay: 0.4s; }
+    @keyframes timelineFadeIn {
+      to { opacity: 1; transform: translateX(0); }
     }
     .timeline-entry::before {
       content: '';
       position: absolute;
       left: -2.5rem;
       top: 4px;
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
-      background: #1B3A5C;
+      background: linear-gradient(135deg, #C23B22, #C5A55A);
       border: 3px solid #EDE8DF;
-      box-shadow: 0 0 0 2px #1B3A5C;
+      box-shadow: 0 0 0 3px rgba(194,59,34,0.3);
+      z-index: 1;
     }
     .timeline-entry .tl-era {
       font-family: 'Noto Serif SC', serif;
@@ -250,8 +346,8 @@
   </div>
 
   <!-- Page Hero -->
-  <section class="page-hero" style="background: linear-gradient(135deg, #1A1A18 0%, #0F2440 50%, #6B4226 100%);">
-    <div style="position:absolute;inset:0;background:rgba(26,26,24,0.45);"></div>
+  <section class="page-hero" style="background: url('纳西古乐/纳西古乐.jpg') center/cover no-repeat;">
+    <div style="position:absolute;inset:0;background: linear-gradient(135deg, rgba(26,26,24,0.7) 0%, rgba(15,36,64,0.6) 50%, rgba(107,66,38,0.5) 100%);"></div>
     <div class="page-hero-content" style="position:relative;z-index:1;text-align:center;padding:8rem 2rem 4rem;">
       <h1 style="font-family:'Noto Serif SC',serif;font-size:3rem;color:#F8F6F0;margin-bottom:1rem;">纳西古乐</h1>
       <p style="color:rgba(248,246,240,0.8);font-size:1.1rem;max-width:640px;margin:0 auto;line-height:1.8;">融合道教法事音乐、儒教典礼音乐与唐宋词牌曲，被誉为"中国音乐的活化石"。</p>
@@ -312,7 +408,7 @@
         <h2>乐器展示</h2>
         <div class="instruments-grid">
 
-          <div class="instrument-card">
+          <div class="instrument-card" data-baidu="https://baike.baidu.com/item/%E7%90%B5%E7%90%B6/341">
             <div class="instrument-img" style="background-image:url('纳西古乐/纳西古乐2.jpg');background-size:cover;background-position:center;">
             </div>
             <div class="instrument-info">
@@ -321,7 +417,7 @@
             </div>
           </div>
 
-          <div class="instrument-card">
+          <div class="instrument-card" data-baidu="https://baike.baidu.com/item/%E7%AB%B9%E7%AC%9B/108240">
             <div class="instrument-img" style="background-image:url('纳西古乐/乐器/竹笛_5.jpg');background-size:cover;background-position:center;">
             </div>
             <div class="instrument-info">
@@ -330,7 +426,7 @@
             </div>
           </div>
 
-          <div class="instrument-card">
+          <div class="instrument-card" data-baidu="https://baike.baidu.com/item/%E8%8B%8F%E5%8F%A4%E7%AC%83">
             <div class="instrument-img" style="background-image:url('纳西古乐/纳西古乐3.jpg');background-size:cover;background-position:center;">
             </div>
             <div class="instrument-info">
@@ -404,13 +500,24 @@
       playing = !playing;
       if(playing){
         bars.classList.add('playing');
-        playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg> 暂停';
+        playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg> <span>暂停</span>';
         if(bgMusic) bgMusic.play();
       } else {
         bars.classList.remove('playing');
-        playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><polygon points="6,3 20,12 6,21"/></svg> 播放古乐';
+        playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><polygon points="6,3 20,12 6,21"/></svg> <span>播放古乐</span>';
         if(bgMusic) bgMusic.pause();
       }
+    });
+
+    // Instrument card click - go to Baidu Baike
+    var instrumentCards = document.querySelectorAll('.instrument-card');
+    instrumentCards.forEach(function(card) {
+      card.addEventListener('click', function() {
+        var baiduUrl = card.getAttribute('data-baidu');
+        if (baiduUrl) {
+          window.open(baiduUrl, '_blank');
+        }
+      });
     });
   })();
   </script>

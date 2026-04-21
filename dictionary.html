@@ -16,23 +16,35 @@
     .converter-input {
       width:100%; padding:1.2em 1.5em; font-size:1.1rem; font-family:var(--font-sans);
       border:2px solid var(--color-mist); background:#fff; color:var(--color-dark);
-      transition:border-color 0.3s; border-radius:0;
+      transition:all 0.3s; border-radius:8px;
     }
-    .converter-input:focus { outline:none; border-color:var(--color-indigo); }
+    .converter-input:focus { outline:none; border-color:var(--color-indigo); box-shadow:0 0 0 4px rgba(27,58,92,0.1); }
     .converter-input::placeholder { color:var(--color-mist); }
     .converter-btn {
       display:inline-block; padding:0.8em 2em; font-family:var(--font-sans);
-      font-size:0.9rem; background:var(--color-indigo); color:var(--color-snow);
-      border:none; cursor:pointer; letter-spacing:0.1em;
-      transition:all 0.3s var(--ease-out);
+      font-size:0.9rem; background:linear-gradient(135deg, var(--color-indigo), #2d5a8a);
+      color:var(--color-snow); border:none; cursor:pointer; letter-spacing:0.1em;
+      transition:all 0.3s var(--ease-out); border-radius:4px; position:relative; overflow:hidden;
     }
-    .converter-btn:hover { background:var(--color-vermilion); transform:scale(1.03); }
+    .converter-btn::before {
+      content:''; position:absolute; inset:0; background:linear-gradient(135deg, var(--color-vermilion), #d65a45);
+      opacity:0; transition:opacity 0.3s;
+    }
+    .converter-btn:hover::before { opacity:1; }
+    .converter-btn span { position:relative; z-index:1; }
+    .converter-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(27,58,92,0.3); }
     .converter-result {
-      min-height:200px; padding:2rem; background:#fff; border:1px solid var(--color-mist);
-      display:flex; flex-wrap:wrap; gap:2rem; align-items:center; justify-content:center;
+      min-height:200px; padding:2rem; background:linear-gradient(135deg, #fff, #F8F6F0);
+      border:1px solid var(--color-mist); display:flex; flex-wrap:wrap; gap:2rem;
+      align-items:center; justify-content:center; border-radius:8px; position:relative;
+    }
+    .converter-result::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:3px;
+      background:linear-gradient(90deg, var(--color-indigo), var(--color-gold), var(--color-vermilion));
     }
     .result-empty { color:var(--color-mist); font-size:0.9rem; }
-    .result-char { text-align:center; }
+    .result-char { text-align:center; transition:transform 0.3s; }
+    .result-char:hover { transform:scale(1.1); }
     .result-char svg { width:80px; height:80px; color:var(--color-indigo); display:block; margin:0 auto 0.5rem; }
     .result-char .char-cn { font-family:var(--font-serif); font-size:1rem; color:var(--color-dark); }
     .result-char .char-en { font-size:0.7rem; color:var(--color-stone); }
@@ -49,15 +61,28 @@
     .cat-tab {
       padding:0.5em 1.5em; font-size:0.85rem; border:1px solid var(--color-mist);
       background:transparent; cursor:pointer; transition:all 0.3s; font-family:var(--font-sans);
+      border-radius:2rem;
     }
-    .cat-tab.active, .cat-tab:hover { border-color:var(--color-indigo); color:var(--color-indigo); background:rgba(27,58,92,0.05); }
+    .cat-tab.active, .cat-tab:hover {
+      border-color:var(--color-indigo); color:#fff; background:linear-gradient(135deg, var(--color-indigo), #2d5a8a);
+      box-shadow:0 4px 15px rgba(27,58,92,0.2);
+    }
     .cat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:1.5rem; }
     .cat-item {
       text-align:center; padding:1.5rem 0.8rem; border:1px solid var(--color-mist);
-      cursor:pointer; transition:all 0.3s var(--ease-out); background:#fff;
+      cursor:pointer; transition:all 0.4s var(--ease-out); background:#fff; border-radius:8px;
+      position:relative; overflow:hidden;
     }
-    .cat-item:hover, .cat-item:focus-visible { transform:translateY(-4px); box-shadow:0 10px 30px rgba(0,0,0,0.08); border-color:var(--color-gold); }
-    .cat-item svg { width:60px; height:60px; color:var(--color-indigo); display:block; margin:0 auto 0.8rem; }
+    .cat-item::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg, rgba(197,165,90,0.1), transparent); opacity:0; transition:opacity 0.3s;
+    }
+    .cat-item:hover, .cat-item:focus-visible {
+      transform:translateY(-6px); box-shadow:0 15px 40px rgba(0,0,0,0.1); border-color:var(--color-gold);
+    }
+    .cat-item:hover::before { opacity:1; }
+    .cat-item svg { width:60px; height:60px; color:var(--color-indigo); display:block; margin:0 auto 0.8rem; transition:transform 0.3s; }
+    .cat-item:hover svg { transform:rotate(5deg) scale(1.1); }
     .cat-item h4 { font-family:var(--font-serif); font-size:1.1rem; color:var(--color-dark); margin-bottom:0.2rem; }
     .cat-item .item-pinyin { font-size:0.75rem; color:var(--color-gold); font-style:italic; }
     .cat-item .item-en { font-size:0.7rem; color:var(--color-stone); text-transform:uppercase; letter-spacing:0.05em; }
@@ -65,26 +90,35 @@
     /* Interactive canvas */
     .dict-canvas-section { margin-top:var(--space-2xl); padding-top:var(--space-xl); border-top:1px solid var(--color-mist); }
     .dict-canvas-wrap { max-width:900px; margin:0 auto; }
-    #dongbaCanvas { width:100%; background:#fff; border:1px solid var(--color-mist); cursor:crosshair; touch-action:none; }
+    #dongbaCanvas { width:100%; background:#fff; border:1px solid var(--color-mist); cursor:crosshair; touch-action:none; border-radius:8px; }
 
     /* Detail modal */
     .char-modal {
-      position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9998;
+      position:fixed; inset:0; background:rgba(15,36,64,0.95); backdrop-filter:blur(10px); z-index:9998;
       display:flex; align-items:center; justify-content:center;
-      opacity:0; pointer-events:none; transition:opacity 0.3s;
+      opacity:0; pointer-events:none; transition:opacity 0.4s;
     }
     .char-modal.active { opacity:1; pointer-events:all; }
     .char-modal-content {
-      background:var(--color-snow); padding:3rem; text-align:center; max-width:400px; width:90%;
+      background:linear-gradient(135deg, #F8F6F0, #EDE8DF); padding:3rem; text-align:center; max-width:420px; width:90%;
+      border-radius:16px; transform:scale(0.9) translateY(20px); transition:transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow:0 25px 80px rgba(0,0,0,0.4); position:relative;
+    }
+    .char-modal.active .char-modal-content { transform:scale(1) translateY(0); }
+    .char-modal-content::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:4px;
+      background:linear-gradient(90deg, var(--color-indigo), var(--color-gold), var(--color-vermilion));
     }
     .char-modal-content svg { width:120px; height:120px; color:var(--color-indigo); margin:0 auto 1.5rem; display:block; }
-    .char-modal-content h2 { font-family:var(--font-serif); font-size:2rem; margin-bottom:0.3rem; }
-    .char-modal-content .modal-pinyin { color:var(--color-gold); font-style:italic; margin-bottom:0.3rem; }
+    .char-modal-content h2 { font-family:var(--font-serif); font-size:2rem; margin-bottom:0.3rem; color:var(--color-dark); }
+    .char-modal-content .modal-pinyin { color:var(--color-gold); font-style:italic; margin-bottom:0.3rem; font-size:1rem; }
     .char-modal-content .modal-en { color:var(--color-stone); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.5rem; }
     .char-modal-close {
-      position:absolute; top:1.5rem; right:1.5rem; background:none; border:none;
-      color:var(--color-snow); font-size:2rem; cursor:pointer;
+      position:absolute; top:1.5rem; right:1.5rem; background:rgba(27,58,92,0.1); border:none;
+      color:var(--color-indigo); font-size:1.5rem; cursor:pointer; width:40px; height:40px;
+      border-radius:50%; display:flex; align-items:center; justify-content:center; transition:all 0.3s;
     }
+    .char-modal-close:hover { background:rgba(27,58,92,0.2); transform:rotate(90deg); }
   </style>
 </head>
 <body>
@@ -118,8 +152,8 @@
 
   <!-- Page Hero -->
   <section class="page-hero">
-    <div class="page-hero-bg"></div>
-    <div class="page-hero-overlay"></div>
+    <div class="page-hero-bg" style="background: url('东巴文化/东巴经书/东巴经书.jpg') center/cover no-repeat;"></div>
+    <div class="page-hero-overlay" style="background: radial-gradient(ellipse at center, rgba(15,36,64,0.6) 30%, rgba(15,36,64,0.85) 100%);"></div>
     <div class="page-hero-content anim-fade-up">
       <span class="section-tag">在线工具</span>
       <h1 class="section-title section-title-light">东巴文字典</h1>
@@ -144,7 +178,7 @@
         <input type="text" class="converter-input" id="inputText" placeholder="在此输入中文，如：山上有水和树" maxlength="50">
       </div>
       <div class="converter-btn-wrap" style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
-        <button class="converter-btn" id="convertBtn">转换为东巴文</button>
+        <button class="converter-btn" id="convertBtn"><span>转换为东巴文</span></button>
         <span style="font-size:0.8rem;color:var(--color-vermilion);line-height:1.5;">
           &#9888; 本转换仅供参考学习，东巴文为表意文字，逐字组合可能无法准确表达完整语义，不代表标准东巴文书写。
         </span>
