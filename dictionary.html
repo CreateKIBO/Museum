@@ -213,6 +213,10 @@
         <canvas id="dongbaCanvas" width="900" height="500"></canvas>
         <div class="canvas-controls">
           <button class="canvas-btn" id="canvasClear">清除画布</button>
+          <button class="canvas-btn canvas-btn-ai" id="canvasRecognize">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
+            AI猜字
+          </button>
           <div class="brush-sizes">
             <button class="brush-btn active" data-size="3">细</button>
             <button class="brush-btn" data-size="6">中</button>
@@ -224,6 +228,14 @@
             <button class="ink-btn" data-color="#1B3A5C" style="background:#1B3A5C"></button>
             <button class="ink-btn" data-color="#C5A55A" style="background:#C5A55A"></button>
           </div>
+        </div>
+        <!-- AI识别结果 -->
+        <div class="ai-result" id="aiResult" style="display:none;">
+          <div class="ai-result-header">
+            <span class="ai-result-tag">AI 识别结果</span>
+            <button class="ai-result-close" id="aiResultClose">&times;</button>
+          </div>
+          <div class="ai-result-list" id="aiResultList"></div>
         </div>
       </div>
     </div>
@@ -252,6 +264,7 @@
   <script src="js/dongba-db.js"></script>
   <script src="js/animations.js"></script>
   <script src="js/canvas-draw.js"></script>
+  <script src="js/ai-recognize.js"></script>
   <script src="js/main.js"></script>
   <script>
   (function(){
@@ -336,6 +349,51 @@
     modalClose.addEventListener('click', function(){ modal.classList.remove('active'); });
     modal.addEventListener('click', function(e){ if(e.target===modal) modal.classList.remove('active'); });
     document.addEventListener('keydown', function(e){ if(e.key==='Escape') modal.classList.remove('active'); });
+
+    // AI Recognize
+    var recognizeBtn = document.getElementById('canvasRecognize');
+    var resultPanel = document.getElementById('aiResult');
+    var resultList = document.getElementById('aiResultList');
+    var resultClose = document.getElementById('aiResultClose');
+    var aiCanvas = document.getElementById('dongbaCanvas');
+    if(recognizeBtn && aiCanvas){
+      function renderResults(results) {
+        if (!results || !results.length) {
+          resultList.innerHTML = '<p style="text-align:center;color:var(--color-stone);padding:1rem;">画布为空或未识别到相似字符，请先在画布上书写东巴文字再试。</p>';
+          resultPanel.style.display = 'block';
+          return;
+        }
+        var html = '';
+        results.forEach(function(r, i) {
+          var pct = Math.round(r.confidence * 100);
+          var barColor = pct > 60 ? 'var(--color-indigo)' : pct > 35 ? 'var(--color-gold)' : 'var(--color-vermilion)';
+          html += '<div class="ai-result-item" style="animation-delay:' + (i * 0.1) + 's">';
+          html += '<div class="ai-result-rank">' + (i + 1) + '</div>';
+          html += '<div class="ai-result-char"><svg viewBox="0 0 100 100" width="60" height="60" style="color:var(--color-indigo)">' + r.svg + '</svg></div>';
+          html += '<div class="ai-result-info">';
+          html += '<h4>' + r.cn + ' <span class="ai-result-pinyin">' + r.pinyin + '</span></h4>';
+          html += '<p class="ai-result-en">' + r.en + '</p>';
+          html += '<div class="ai-confidence-bar"><div class="ai-confidence-fill" style="width:' + pct + '%;background:' + barColor + '"></div></div>';
+          html += '<span class="ai-confidence-text">匹配度 ' + pct + '%</span>';
+          html += '</div></div>';
+        });
+        resultList.innerHTML = html;
+        resultPanel.style.display = 'block';
+      }
+
+      recognizeBtn.addEventListener('click', function() {
+        if (typeof RecognizeDongba === 'undefined') return;
+        resultList.innerHTML = '<p style="text-align:center;color:var(--color-gold);padding:1rem;">正在识别中...</p>';
+        resultPanel.style.display = 'block';
+        RecognizeDongba.recognize(aiCanvas).then(renderResults).catch(function() {
+          renderResults([]);
+        });
+      });
+
+      if(resultClose){
+        resultClose.addEventListener('click', function(){ resultPanel.style.display = 'none'; });
+      }
+    }
   })();
   </script>
 </body>
