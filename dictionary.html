@@ -119,6 +119,61 @@
       border-radius:50%; display:flex; align-items:center; justify-content:center; transition:all 0.3s;
     }
     .char-modal-close:hover { background:rgba(27,58,92,0.2); transform:rotate(90deg); }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .cat-tabs {
+        gap: 0.5rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        padding-bottom: 0.5rem;
+        scrollbar-width: none;
+      }
+      .cat-tabs::-webkit-scrollbar { display: none; }
+      .cat-tab {
+        padding: 0.4em 1.2em;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .cat-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.8rem;
+      }
+      .cat-item {
+        padding: 1rem 0.5rem;
+      }
+      .cat-item svg {
+        width: 48px;
+        height: 48px;
+      }
+      .cat-item h4 {
+        font-size: 0.95rem;
+      }
+      .cat-item .item-pinyin {
+        font-size: 0.65rem;
+      }
+      .cat-item .item-en {
+        font-size: 0.6rem;
+      }
+    }
+    @media (max-width: 400px) {
+      .cat-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.6rem;
+      }
+      .cat-item {
+        padding: 0.8rem 0.4rem;
+      }
+      .cat-item svg {
+        width: 40px;
+        height: 40px;
+      }
+      .cat-item h4 {
+        font-size: 0.85rem;
+      }
+    }
   </style>
 </head>
 <body>
