@@ -1027,6 +1027,11 @@ body:hover .custom-cursor { opacity: 0.6; }
   border-color: var(--color-indigo);
   color: var(--color-indigo);
 }
+.canvas-btn.active {
+  border-color: var(--color-vermilion);
+  color: var(--color-vermilion);
+  background: rgba(194,59,34,0.08);
+}
 .canvas-btn-ai {
   border-color: var(--color-gold);
   color: var(--color-gold);

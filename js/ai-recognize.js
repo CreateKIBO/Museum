@@ -1,26 +1,25 @@
 /* ai-recognize.js — AI东巴文字识别模块
  * 将用户绘制和参考SVG统一渲染为像素，在同一特征空间内做相似度比对
+ * 优化：距离变换匹配、结构特征、多尺度网格、骨架归一化
  */
 
 (function(global) {
   'use strict';
 
-  var GRID_SIZE = 8;        // 密度网格分辨率
-  var NORM_SIZE = 64;       // 标准化渲染尺寸
+  var GRID_SIZE = 8;
+  var NORM_SIZE = 64;
   var CACHE_KEY = '__dongbaRenderCache';
 
   // ======== 图像预处理 ========
 
-  // 获取二值化矩阵（1=笔画, 0=空白），同时返回边界框
   function getBinaryMatrix(imageData, w, h) {
     var mat = new Uint8Array(w * h);
     var minX = w, minY = h, maxX = -1, maxY = -1;
     for (var y = 0; y < h; y++) {
       for (var x = 0; x < w; x++) {
         var idx = (y * w + x) * 4;
-        // 任意通道偏暗即为笔画
-        var isStroke = imageData[idx] < 200 || imageData[idx + 1] < 200 || imageData[idx + 2] < 200;
-        if (isStroke) {
+        var brightness = imageData[idx] * 0.299 + imageData[idx+1] * 0.587 + imageData[idx+2] * 0.114;
+        if (brightness < 200) {
           mat[y * w + x] = 1;
           if (x < minX) minX = x;
           if (x > maxX) maxX = x;
@@ -40,61 +39,185 @@
     var bb = binary.bbox;
     if (bb.w <= 0 || bb.h <= 0) return null;
 
-    var pad = 6;
+    var pad = Math.max(4, Math.max(bb.w, bb.h) * 0.08);
     var sx = Math.max(0, bb.x - pad);
     var sy = Math.max(0, bb.y - pad);
     var sw = Math.min(binary.w - sx, bb.w + pad * 2);
     var sh = Math.min(binary.h - sy, bb.h + pad * 2);
 
-    // 创建标准画布
-    var canvas = document.createElement('canvas');
-    canvas.width = NORM_SIZE;
-    canvas.height = NORM_SIZE;
-    var ctx = canvas.getContext('2d');
-
-    // 计算缩放，保持比例并居中
-    var scale = Math.min((NORM_SIZE - 8) / sw, (NORM_SIZE - 8) / sh);
+    var margin = 6;
+    var scale = Math.min((NORM_SIZE - margin * 2) / sw, (NORM_SIZE - margin * 2) / sh);
     var dw = sw * scale;
     var dh = sh * scale;
     var dx = (NORM_SIZE - dw) / 2;
     var dy = (NORM_SIZE - dh) / 2;
 
-    // 用 ImageData 方式手动缩放（避免 canvas drawImage 依赖）
     var srcMat = binary.mat;
     var srcW = binary.w;
     var normMat = new Uint8Array(NORM_SIZE * NORM_SIZE);
 
     for (var ny = 0; ny < NORM_SIZE; ny++) {
       for (var nx = 0; nx < NORM_SIZE; nx++) {
-        // 映射回源坐标
         var srcXf = sx + (nx - dx) / scale;
         var srcYf = sy + (ny - dy) / scale;
-        // 2x2 采样
-        var x0 = Math.floor(srcXf), y0 = Math.floor(srcYf);
-        var x1 = x0 + 1, y1 = y0 + 1;
+        // 3x3 supersampling for better quality
         var count = 0;
-        if (x0 >= 0 && x0 < binary.w && y0 >= 0 && y0 < binary.h && srcMat[y0 * srcW + x0]) count++;
-        if (x1 >= 0 && x1 < binary.w && y0 >= 0 && y0 < binary.h && srcMat[y0 * srcW + x1]) count++;
-        if (x0 >= 0 && x0 < binary.w && y1 >= 0 && y1 < binary.h && srcMat[y1 * srcW + x0]) count++;
-        if (x1 >= 0 && x1 < binary.w && y1 >= 0 && y1 < binary.h && srcMat[y1 * srcW + x1]) count++;
-        if (count >= 2) normMat[ny * NORM_SIZE + nx] = 1;
+        var samples = 0;
+        for (var sy2 = -0.5; sy2 <= 0.5; sy2 += 0.5) {
+          for (var sx2 = -0.5; sx2 <= 0.5; sx2 += 0.5) {
+            var sxi = Math.floor(srcXf + sx2);
+            var syi = Math.floor(srcYf + sy2);
+            samples++;
+            if (sxi >= 0 && sxi < binary.w && syi >= 0 && syi < binary.h) {
+              if (srcMat[syi * srcW + sxi]) count++;
+            }
+          }
+        }
+        if (count >= samples * 0.3) normMat[ny * NORM_SIZE + nx] = 1;
       }
     }
     return normMat;
   }
 
+  // 简单的形态学腐蚀（3x3）
+  function erode(mat) {
+    var out = new Uint8Array(NORM_SIZE * NORM_SIZE);
+    for (var y = 1; y < NORM_SIZE - 1; y++) {
+      for (var x = 1; x < NORM_SIZE - 1; x++) {
+        if (mat[y * NORM_SIZE + x]) {
+          // Keep only if at least 5 neighbors are also filled
+          var neighbors = 0;
+          for (var dy = -1; dy <= 1; dy++) {
+            for (var dx = -1; dx <= 1; dx++) {
+              if (mat[(y+dy) * NORM_SIZE + (x+dx)]) neighbors++;
+            }
+          }
+          if (neighbors >= 5) out[y * NORM_SIZE + x] = 1;
+        }
+      }
+    }
+    return out;
+  }
+
+  // 简单的形态学膨胀（3x3）
+  function dilate(mat) {
+    var out = new Uint8Array(NORM_SIZE * NORM_SIZE);
+    for (var y = 1; y < NORM_SIZE - 1; y++) {
+      for (var x = 1; x < NORM_SIZE - 1; x++) {
+        if (mat[y * NORM_SIZE + x]) {
+          for (var dy = -1; dy <= 1; dy++) {
+            for (var dx = -1; dx <= 1; dx++) {
+              out[(y+dy) * NORM_SIZE + (x+dx)] = 1;
+            }
+          }
+        }
+      }
+    }
+    return out;
+  }
+
+  // 骨架化（迭代细化）- 将笔画细化到1像素宽
+  function skeletonize(mat) {
+    var current = new Uint8Array(mat);
+    var changed = true;
+    var iterations = 0;
+    var maxIter = 20;
+
+    while (changed && iterations < maxIter) {
+      changed = false;
+      iterations++;
+      var next = new Uint8Array(current);
+
+      for (var y = 1; y < NORM_SIZE - 1; y++) {
+        for (var x = 1; x < NORM_SIZE - 1; x++) {
+          if (!current[y * NORM_SIZE + x]) continue;
+
+          var p2 = current[(y-1) * NORM_SIZE + x];
+          var p3 = current[(y-1) * NORM_SIZE + (x+1)];
+          var p4 = current[y * NORM_SIZE + (x+1)];
+          var p5 = current[(y+1) * NORM_SIZE + (x+1)];
+          var p6 = current[(y+1) * NORM_SIZE + x];
+          var p7 = current[(y+1) * NORM_SIZE + (x-1)];
+          var p8 = current[y * NORM_SIZE + (x-1)];
+          var p9 = current[(y-1) * NORM_SIZE + (x-1)];
+
+          var B = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
+          if (B < 2 || B > 6) continue;
+
+          // Count 0→1 transitions
+          var transitions = 0;
+          var seq = [p2,p3,p4,p5,p6,p7,p8,p9,p2];
+          for (var i = 0; i < 8; i++) {
+            if (!seq[i] && seq[i+1]) transitions++;
+          }
+          if (transitions !== 1) continue;
+
+          // Zhang-Suen conditions (alternating)
+          if (iterations % 2 === 1) {
+            if (p2 && p4 && p6) continue;
+            if (p4 && p6 && p8) continue;
+          } else {
+            if (p2 && p4 && p8) continue;
+            if (p2 && p6 && p8) continue;
+          }
+
+          next[y * NORM_SIZE + x] = 0;
+          changed = true;
+        }
+      }
+      current = next;
+    }
+    return current;
+  }
+
+  // 计算距离变换（每个空白像素到最近笔画像素的距离）
+  function distanceTransform(mat) {
+    var dist = new Float32Array(NORM_SIZE * NORM_SIZE);
+    var INF = NORM_SIZE * 2;
+
+    // Initialize
+    for (var i = 0; i < NORM_SIZE * NORM_SIZE; i++) {
+      dist[i] = mat[i] ? 0 : INF;
+    }
+
+    // Forward pass
+    for (var y = 0; y < NORM_SIZE; y++) {
+      for (var x = 0; x < NORM_SIZE; x++) {
+        var idx = y * NORM_SIZE + x;
+        if (y > 0) dist[idx] = Math.min(dist[idx], dist[(y-1)*NORM_SIZE+x] + 1);
+        if (x > 0) dist[idx] = Math.min(dist[idx], dist[y*NORM_SIZE+(x-1)] + 1);
+        if (y > 0 && x > 0) dist[idx] = Math.min(dist[idx], dist[(y-1)*NORM_SIZE+(x-1)] + 1.41);
+        if (y > 0 && x < NORM_SIZE-1) dist[idx] = Math.min(dist[idx], dist[(y-1)*NORM_SIZE+(x+1)] + 1.41);
+      }
+    }
+
+    // Backward pass
+    for (var y = NORM_SIZE - 1; y >= 0; y--) {
+      for (var x = NORM_SIZE - 1; x >= 0; x--) {
+        var idx = y * NORM_SIZE + x;
+        if (y < NORM_SIZE-1) dist[idx] = Math.min(dist[idx], dist[(y+1)*NORM_SIZE+x] + 1);
+        if (x < NORM_SIZE-1) dist[idx] = Math.min(dist[idx], dist[y*NORM_SIZE+(x+1)] + 1);
+        if (y < NORM_SIZE-1 && x < NORM_SIZE-1) dist[idx] = Math.min(dist[idx], dist[(y+1)*NORM_SIZE+(x+1)] + 1.41);
+        if (y < NORM_SIZE-1 && x > 0) dist[idx] = Math.min(dist[idx], dist[(y+1)*NORM_SIZE+(x-1)] + 1.41);
+      }
+    }
+
+    return dist;
+  }
+
   // ======== SVG 渲染 ========
 
-  // 将SVG渲染为NORM_SIZE x NORM_SIZE的二值矩阵
   function renderSvgToBinary(svgStr) {
-    var fullSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="' + NORM_SIZE + '" height="' + NORM_SIZE + '">' + svgStr + '</svg>';
+    // Replace currentColor with a concrete color for reliable rendering
+    var processedSvg = svgStr.replace(/currentColor/g, '#1A1A18');
+    var fullSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="' + NORM_SIZE + '" height="' + NORM_SIZE + '">' + processedSvg + '</svg>';
     var blob = new Blob([fullSvg], { type: 'image/svg+xml;charset=utf-8' });
     var url = URL.createObjectURL(blob);
 
-    var canvas = document.createElement('canvas');
-    canvas.width = NORM_SIZE;
-    canvas.height = NORM_SIZE;
-    var ctx = canvas.getContext('2d');
+    var cv = document.createElement('canvas');
+    cv.width = NORM_SIZE;
+    cv.height = NORM_SIZE;
+    var ctx = cv.getContext('2d');
 
     return new Promise(function(resolve) {
       var img = new Image();
@@ -122,7 +245,6 @@
     }
     if (!global.DONGBA_DB) return Promise.resolve(null);
 
-    // 去重：同一cn取第一个
     var seen = {};
     var unique = global.DONGBA_DB.filter(function(d) {
       if (seen[d.cn]) return false;
@@ -136,8 +258,12 @@
     var promises = unique.map(function(char) {
       return renderSvgToBinary(char.svg).then(function(binary) {
         if (binary) {
+          var skeleton = skeletonize(binary);
+          var distMap = distanceTransform(binary);
           cache.data[char.cn] = {
             binary: binary,
+            skeleton: skeleton,
+            distMap: distMap,
             char: char
           };
         }
@@ -156,35 +282,34 @@
     if (!normMat) return null;
 
     var features = {
-      // 8x8 密度网格
       density: new Float32Array(GRID_SIZE * GRID_SIZE),
-      // 水平投影（归一化）
+      density16: new Float32Array(16 * 16),    // finer grid
       hProj: new Float32Array(NORM_SIZE),
-      // 垂直投影（归一化）
       vProj: new Float32Array(NORM_SIZE),
-      // 径向分布（从中心到边缘分4环）
       radial: new Float32Array(4),
-      // 象限密度
       quadrants: new Float32Array(4),
-      // 总笔画密度
       totalDensity: 0,
-      // 宽高比
       aspectRatio: 1,
-      // 重心
-      cx: 0.5, cy: 0.5
+      cx: 0.5, cy: 0.5,
+      // Structural features
+      endpoints: 0,
+      junctions: 0,
+      crossings: 0
     };
 
     var cellW = NORM_SIZE / GRID_SIZE;
     var cellH = NORM_SIZE / GRID_SIZE;
+    var cellW16 = NORM_SIZE / 16;
+    var cellH16 = NORM_SIZE / 16;
     var centerX = NORM_SIZE / 2, centerY = NORM_SIZE / 2;
     var maxRadius = Math.sqrt(centerX * centerX + centerY * centerY);
     var sumX = 0, sumY = 0, totalCount = 0;
-
-    // 边界框
     var bx0 = NORM_SIZE, by0 = NORM_SIZE, bx1 = 0, by1 = 0;
 
+    // Build skeleton for structural features
+    var skel = skeletonize(normMat);
+
     for (var y = 0; y < NORM_SIZE; y++) {
-      var rowSum = 0;
       for (var x = 0; x < NORM_SIZE; x++) {
         var v = normMat[y * NORM_SIZE + x];
         if (!v) continue;
@@ -196,46 +321,51 @@
         if (y < by0) by0 = y;
         if (y > by1) by1 = y;
 
-        // 密度网格
+        // 8x8 density grid
         var gx = Math.min(GRID_SIZE - 1, (x / cellW) | 0);
         var gy = Math.min(GRID_SIZE - 1, (y / cellH) | 0);
         features.density[gy * GRID_SIZE + gx] += 1;
 
-        // 径向分布
+        // 16x16 density grid
+        var gx16 = Math.min(15, (x / cellW16) | 0);
+        var gy16 = Math.min(15, (y / cellH16) | 0);
+        features.density16[gy16 * 16 + gx16] += 1;
+
         var dx = x - centerX, dy = y - centerY;
         var dist = Math.sqrt(dx * dx + dy * dy) / maxRadius;
         var ring = Math.min(3, (dist * 4) | 0);
         features.radial[ring] += 1;
 
-        // 象限
         var qi = (y < centerY ? 0 : 2) + (x < centerX ? 0 : 1);
         features.quadrants[qi] += 1;
 
-        // 投影
         features.hProj[y] += 1;
         features.vProj[x] += 1;
+
+        // Structural: analyze skeleton neighbors
+        if (skel[y * NORM_SIZE + x] && y > 0 && y < NORM_SIZE-1 && x > 0 && x < NORM_SIZE-1) {
+          var neighbors = 0;
+          if (skel[(y-1)*NORM_SIZE+x]) neighbors++;
+          if (skel[(y+1)*NORM_SIZE+x]) neighbors++;
+          if (skel[y*NORM_SIZE+(x-1)]) neighbors++;
+          if (skel[y*NORM_SIZE+(x+1)]) neighbors++;
+          if (neighbors === 1) features.endpoints++;
+          else if (neighbors >= 3) features.junctions++;
+        }
       }
     }
 
     if (totalCount === 0) return null;
 
-    // 归一化
+    // Normalize
     var cellArea = cellW * cellH;
-    for (var i = 0; i < features.density.length; i++) {
-      features.density[i] /= cellArea;
-    }
-    for (var i = 0; i < features.hProj.length; i++) {
-      features.hProj[i] /= NORM_SIZE;
-    }
-    for (var i = 0; i < features.vProj.length; i++) {
-      features.vProj[i] /= NORM_SIZE;
-    }
-    for (var i = 0; i < features.radial.length; i++) {
-      features.radial[i] /= totalCount;
-    }
-    for (var i = 0; i < features.quadrants.length; i++) {
-      features.quadrants[i] /= totalCount;
-    }
+    var cellArea16 = cellW16 * cellH16;
+    for (var i = 0; i < features.density.length; i++) features.density[i] /= cellArea;
+    for (var i = 0; i < features.density16.length; i++) features.density16[i] /= cellArea16;
+    for (var i = 0; i < features.hProj.length; i++) features.hProj[i] /= NORM_SIZE;
+    for (var i = 0; i < features.vProj.length; i++) features.vProj[i] /= NORM_SIZE;
+    for (var i = 0; i < features.radial.length; i++) features.radial[i] /= totalCount;
+    for (var i = 0; i < features.quadrants.length; i++) features.quadrants[i] /= totalCount;
 
     features.totalDensity = totalCount / (NORM_SIZE * NORM_SIZE);
     features.cx = sumX / totalCount / NORM_SIZE;
@@ -249,7 +379,6 @@
 
   // ======== 相似度计算 ========
 
-  // 余弦相似度
   function cosineSim(a, b) {
     var dot = 0, na = 0, nb = 0;
     for (var i = 0; i < a.length; i++) {
@@ -261,7 +390,6 @@
     return denom > 0 ? dot / denom : 0;
   }
 
-  // 归一化互相关
   function crossCorrelate(a, b) {
     var len = a.length;
     var meanA = 0, meanB = 0;
@@ -281,69 +409,81 @@
   }
 
   function computeSimilarity(fDraw, fRef) {
-    // 1. 密度网格余弦相似度（权重最高）
     var densitySim = cosineSim(fDraw.density, fRef.density);
-
-    // 2. 水平投影互相关
+    var density16Sim = cosineSim(fDraw.density16, fRef.density16);
     var hProjSim = crossCorrelate(fDraw.hProj, fRef.hProj);
-
-    // 3. 垂直投影互相关
     var vProjSim = crossCorrelate(fDraw.vProj, fRef.vProj);
-
-    // 4. 径向分布相似度
     var radialSim = cosineSim(fDraw.radial, fRef.radial);
-
-    // 5. 象限分布相似度
     var quadSim = cosineSim(fDraw.quadrants, fRef.quadrants);
 
-    // 6. 重心距离
-    var cDist = Math.sqrt(
-      Math.pow(fDraw.cx - fRef.cx, 2) + Math.pow(fDraw.cy - fRef.cy, 2)
-    );
+    var cDist = Math.sqrt(Math.pow(fDraw.cx - fRef.cx, 2) + Math.pow(fDraw.cy - fRef.cy, 2));
     var centroidSim = Math.max(0, 1 - cDist * 2);
 
-    // 7. 密度范围接近度
     var densDiff = Math.abs(fDraw.totalDensity - fRef.totalDensity);
-    var densSim = Math.max(0, 1 - densDiff * 5);
+    var densSim = Math.max(0, 1 - densDiff * 4);
 
-    // 8. 宽高比接近度
     var arDiff = Math.abs(fDraw.aspectRatio - fRef.aspectRatio);
-    var arSim = Math.max(0, 1 - arDiff);
+    var arSim = Math.max(0, 1 - arDiff * 0.8);
 
-    // 加权综合
+    // Structural similarity: endpoints and junctions count ratio
+    var epSim = 1;
+    if (fRef.endpoints > 0 || fDraw.endpoints > 0) {
+      var epMax = Math.max(fDraw.endpoints, fRef.endpoints, 1);
+      epSim = 1 - Math.abs(fDraw.endpoints - fRef.endpoints) / epMax;
+    }
+    var jnSim = 1;
+    if (fRef.junctions > 0 || fDraw.junctions > 0) {
+      var jnMax = Math.max(fDraw.junctions, fRef.junctions, 1);
+      jnSim = 1 - Math.abs(fDraw.junctions - fRef.junctions) / jnMax;
+    }
+
     var score =
-      densitySim * 0.25 +
-      hProjSim  * 0.15 +
-      vProjSim  * 0.15 +
-      radialSim * 0.12 +
-      quadSim   * 0.10 +
-      centroidSim * 0.08 +
-      densSim   * 0.08 +
-      arSim     * 0.07;
+      densitySim   * 0.15 +
+      density16Sim * 0.18 +
+      hProjSim     * 0.10 +
+      vProjSim     * 0.10 +
+      radialSim    * 0.08 +
+      quadSim      * 0.06 +
+      centroidSim  * 0.05 +
+      densSim      * 0.05 +
+      arSim        * 0.05 +
+      epSim        * 0.04 +
+      jnSim        * 0.04;
 
     return score;
   }
 
-  // ======== 像素级模板匹配（精细比对） ========
+  // ======== 距离变换匹配（容错像素比对） ========
 
-  function pixelSimilarity(matA, matB) {
-    var match = 0, total = 0;
+  function dtSimilarity(matA, distMapB) {
+    // For each stroke pixel in A, look up distance in B's distance map
+    var totalDist = 0;
+    var countA = 0;
     for (var i = 0; i < NORM_SIZE * NORM_SIZE; i++) {
-      var a = matA[i], b = matB[i];
-      // 都有笔画
-      if (a && b) match += 2;
-      // 一个有一个没有
-      else if (a || b) match -= 1;
-      // 都空白忽略
-      total += 2;
+      if (matA[i]) {
+        totalDist += distMapB[i];
+        countA++;
+      }
     }
-    return total > 0 ? Math.max(0, match / total) : 0;
+    if (countA === 0) return 0;
+
+    // Average distance, normalized by NORM_SIZE, then convert to similarity
+    var avgDist = totalDist / countA;
+    var sim = Math.max(0, 1 - avgDist / 12);
+    return sim;
+  }
+
+  // 双向距离变换匹配
+  function bidirectionalDtSim(matA, distMapA, matB, distMapB) {
+    var simAB = dtSimilarity(matA, distMapB);
+    var simBA = dtSimilarity(matB, distMapA);
+    return (simAB + simBA) / 2;
   }
 
   // ======== 主识别函数 ========
 
   function recognizeDrawing(canvas) {
-    if (!canvas || !global.DONGBA_DB) return [];
+    if (!canvas || !global.DONGBA_DB) return Promise.resolve([]);
 
     var ctx = canvas.getContext('2d');
     var w = canvas.width, h = canvas.height;
@@ -351,20 +491,21 @@
     try {
       imgData = ctx.getImageData(0, 0, w, h).data;
     } catch (e) {
-      return [];
+      return Promise.resolve([]);
     }
 
-    // 二值化 & 裁剪
     var binary = getBinaryMatrix(imgData, w, h);
-    if (binary.bbox.w <= 0 || binary.bbox.h <= 0) return [];
+    if (binary.bbox.w <= 0 || binary.bbox.h <= 0) return Promise.resolve([]);
 
     var normMat = normalizeBinary(binary);
-    if (!normMat) return [];
+    if (!normMat) return Promise.resolve([]);
 
     var drawFeatures = extractFeatures(normMat);
-    if (!drawFeatures) return [];
+    if (!drawFeatures) return Promise.resolve([]);
 
-    // 确保缓存就绪后进行匹配
+    // Distance transform for user drawing
+    var drawDistMap = distanceTransform(normMat);
+
     return ensureCache().then(function(cache) {
       if (!cache) return [];
 
@@ -379,16 +520,27 @@
         var refFeatures = extractFeatures(entry.binary);
         if (!refFeatures) continue;
 
-        // 特征级相似度
+        // 1. Feature-level similarity
         var featureSim = computeSimilarity(drawFeatures, refFeatures);
 
-        // 像素级相似度
-        var pixelSim = pixelSimilarity(normMat, entry.binary);
+        // 2. Bidirectional distance transform matching
+        var dtSim = bidirectionalDtSim(normMat, drawDistMap, entry.binary, entry.distMap);
 
-        // 综合得分（像素匹配权重更高）
-        var confidence = featureSim * 0.55 + pixelSim * 0.45;
+        // 3. Skeleton overlap (structural shape match)
+        var skelMatch = 0, skelTotal = 0;
+        var drawSkel = skeletonize(normMat);
+        for (var j = 0; j < NORM_SIZE * NORM_SIZE; j++) {
+          if (drawSkel[j] || entry.skeleton[j]) {
+            skelTotal++;
+            if (drawSkel[j] && entry.skeleton[j]) skelMatch++;
+          }
+        }
+        var skelSim = skelTotal > 0 ? skelMatch / skelTotal : 0;
 
-        if (confidence > 0.15) {
+        // Combined score with tuned weights
+        var confidence = featureSim * 0.30 + dtSim * 0.40 + skelSim * 0.30;
+
+        if (confidence > 0.12) {
           results.push({
             cn: entry.char.cn,
             pinyin: entry.char.pinyin,
